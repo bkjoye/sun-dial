@@ -116,7 +116,13 @@ public class WatchView extends Ui.WatchFace {
     for (var i=0; i < radialData.size(); i=i+1){
 
       if (complication == radialData[i]["complicationId"]) {
-        radialData[i]["value"] = thisComplication.value;
+        if (thisComplication.getType() == Complications.COMPLICATION_TYPE_BATTERY){
+          radialData[i]["days"] = Sys.getSystemStats().batteryInDays;
+          radialData[i]["pct"] = thisComplication.value;
+          radialData[i]["value"] = Lang.format("$1$% - $2$D", [thisComplication.value.format("%2d"), radialData[i]["days"].format("%2d")]);
+        } else {
+          radialData[i]["value"] = thisComplication.value;
+        }
         if (thisComplication.shortLabel != null){
         radialData[i]["label"] = thisComplication.shortLabel;
         } else {
@@ -190,13 +196,27 @@ public class WatchView extends Ui.WatchFace {
         tmplabel = label.toString();
       }
       var tmpval = "--";
-      if (value != null && value instanceof Lang.Number) {
-        tmpval = value.format(radialData[i]["format"]);
-      } else if (value != null && value instanceof Lang.Number && label.equals("STEPS")) {
-        // tmpval = value.toNumber().format(radialData[i]["format"]);
-        tmpval = Lang.format("$1$.$2$k", [(value/1000).format("%2d"), ((value % 1000)/100).format("%1d")]);
+      if (value != null && value instanceof Lang.Float) {
+          tmpval = Lang.format("$1$k", [value.format(radialData[i]["format"])]);
+      } else if (value != null && value instanceof Lang.Number) {
+        if (radialData[i]["format"].equals("%.1f")){
+          tmpval = Lang.format("$1$k", [(value/1000.0).format(radialData[i]["format"])]);
+        } else {        
+          tmpval = value.format(radialData[i]["format"]);
+        }
+      } else if (value != null && value instanceof Lang.String && !value.equals("-")) {
+        tmpval = value;
+        if (radialData[i].hasKey("pct") && radialData[i]["pct"] != null){
+          drawBattery(dc, radialData[i]);
+          tmplabel = "";
+        }
       }
-      var text = Lang.format("$1$: $2$", [tmplabel, tmpval]);//tmplabel+": "+tmpval;
+      var text = "";
+      if (!tmplabel.equals("")){
+        text = Lang.format("$1$: $2$", [tmplabel, tmpval]);//tmplabel+": "+tmpval;
+      } else {
+        text = Lang.format("$1$", [tmpval]);
+      }
       // } else {
       //   if (Complications.getComplication(radialData[i]["complicationId"]).getType() == Complications.COMPLICATION_TYPE_INVALID){
       //     System.println("Complication Invalid");
@@ -206,7 +226,7 @@ public class WatchView extends Ui.WatchFace {
       // }
       var justification = Gfx.TEXT_JUSTIFY_CENTER;
       var angle = radialData[i]["angle"];
-      var radius = angle <= 180 ? dw/2-(dc.getFontHeight(font)) : dw/2-2;
+      var radius = angle <= 180 ? dw/2-(dc.getFontHeight(font)) : dw/2-10;
       if (radialData[i]["radius"] == null){
         radialData[i]["radius"] = dw/2-(dc.getFontHeight(font))-.04*dw;
       }
@@ -215,6 +235,23 @@ public class WatchView extends Ui.WatchFace {
       dc.drawRadialText(center_x, center_y, font, text, justification, angle, radius, direction);
     }
 
+  }
+
+  function drawBattery(dc, data){
+    var radius = dh/2;
+    var degreeStart = 270-22.5;
+    var degreeEnd = degreeStart+(45*data["pct"]/100.0);
+    var direction = dc.ARC_COUNTER_CLOCKWISE;
+    dc.setPenWidth(10);
+    if (data["pct"]>75){
+      dc.setColor(Gfx.COLOR_GREEN, Gfx.COLOR_TRANSPARENT);
+    } else if (data["pct"]>30){
+      dc.setColor(Gfx.COLOR_YELLOW, Gfx.COLOR_TRANSPARENT);
+    } else {
+      dc.setColor(Gfx.COLOR_RED, Gfx.COLOR_TRANSPARENT);
+    }
+    dc.drawArc(center_x, center_y, radius, direction, degreeStart, degreeEnd);
+    dc.setColor(Gfx.COLOR_LT_GRAY, Gfx.COLOR_TRANSPARENT);
   }
 
   function drawSunInfo(dc){
@@ -226,7 +263,7 @@ public class WatchView extends Ui.WatchFace {
     dc.setPenWidth(2);
     dc.drawArc(center_x, center_y+offset, radius, direction, degreeStart, degreeEnd);
 
-    if (sunData[1]["value"] != null && sunData[0]["day_seconds"] >= sunData[0]["value"] && sunData[0]["day_seconds"] < sunData[1]["value"]){
+    if (sunData[1]["value"] != null && sunData[0]["value"] != null && sunData[0]["day_seconds"] >= sunData[0]["value"] && sunData[0]["day_seconds"] < sunData[1]["value"]){
       var day_remain = (sunData[1]["value"]-sunData[0]["day_seconds"]);
       var daylight_seconds = sunData[1]["value"]-sunData[0]["value"];
       var angle_range = (degreeStart-degreeEnd).abs();

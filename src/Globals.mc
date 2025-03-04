@@ -31,7 +31,7 @@ public var radialData = [
         "angle" => 45,
         "radius" => null,
         "value" => null,
-        "format" => "%5d",
+        "format" => "%.1f",
         "complicationId" => new Complications.Id(Complications.COMPLICATION_TYPE_STEPS)
       },
       {
@@ -48,6 +48,8 @@ public var radialData = [
         "radius" => null,
         "value" => null,
         "format" => "%3d",
+        "days" => null,
+        "pct" => null,
         "complicationId" => new Complications.Id(Complications.COMPLICATION_TYPE_BATTERY)
       }
     ];
