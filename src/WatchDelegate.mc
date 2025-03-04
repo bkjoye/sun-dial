@@ -19,15 +19,21 @@ class WatchDelegate extends Ui.WatchFaceDelegate {
     var co_ords = clickEvent.getCoordinates();
     Sys.println( "clickEvent x:" + co_ords[0] + ", y:" + co_ords[1]  );
 
-    // returns the complicationId within the boundingBoxes
-    var complicationId = checkBoundingBoxes(co_ords);
+    co_ords[0] = co_ords[0]-dw/2;
+    co_ords[1] = -co_ords[1]+dh/2;
+
+    Sys.println( "transformed x:" + co_ords[0] + ", y:" + co_ords[1]  );
+
+    // returns the complicationId within the radialData
+    var complicationId = checkradialData(co_ords);
 
     //
-    if (complicationId) {
+    if (complicationId != null) {
         Sys.println( "We found a complication! let's launch it ..." );
-        var thisComplication = new Complications.Id(complicationId);
-        if (thisComplication) {
-          Complications.exitTo(thisComplication);
+        try {
+          Complications.exitTo(complicationId);
+        } catch(e){
+          Sys.println("Failed to Open Complication");
         }
         return(true);
     } else {

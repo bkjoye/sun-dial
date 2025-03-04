@@ -16,10 +16,6 @@ enum {
 
 public class WatchView extends Ui.WatchFace {
 
-  // globals for devices width and height
-  var dw = 0;
-  var dh = 0;
-
   function initialize() {
    Ui.WatchFace.initialize();
   }
@@ -30,8 +26,11 @@ public class WatchView extends Ui.WatchFace {
     dw = dc.getWidth();
     dh = dc.getHeight();
 
+    center_x = dw/2;
+    center_y = dh/2;
+
     // define the global bounding boxes
-    defineBoundingBoxes(dc);
+    // defineradialData();
 
   }
 
@@ -48,11 +47,15 @@ public class WatchView extends Ui.WatchFace {
     var hour = clockTime.hour;
     var minute = clockTime.min < 10 ? "0" + clockTime.min : clockTime.min;
     var font = Gfx.FONT_SYSTEM_NUMBER_HOT;
-    dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_TRANSPARENT);
+    dc.setColor(Gfx.COLOR_LT_GRAY, Gfx.COLOR_TRANSPARENT);
     dc.drawText(dw/2,dh/2-(dc.getFontHeight(font)/2),font,hour.toString()+":"+minute.toString(),Gfx.TEXT_JUSTIFY_CENTER);
 
+    if (hour instanceof Lang.Number && minute instanceof Lang.Number) {
+      sunData[0]["day_seconds"] = hour*3600+minute*60+clockTime.sec;
+    }
     // draw bounding boxes (debug)
-    drawBoundingBoxes(dc);
+    drawRadialData(dc);
+    drawSunInfo(dc);
 
   }
 
@@ -68,38 +71,38 @@ public class WatchView extends Ui.WatchFace {
   function onEnterSleep() {
   }
 
-  function defineBoundingBoxes(dc) {
+  function defineradialData() {
 
     // "bounds" format is an array as follows [ x, y, r ]
     //  x,y = center of circle
     //  r = radius
 
-    var radius = dw/5;
+    // var radius = dw/5;
 
-    boundingBoxes = [
+    radialData = [
       {
         "label" => "Heart Rate",
-        "bounds" => [dw/4,dh/4,radius],
+        "angle" => 135,
         "value" => "",
-        "complicationId" => Complications.COMPLICATION_TYPE_HEART_RATE
+        "complicationId" => new Complications.Id(Complications.COMPLICATION_TYPE_HEART_RATE)
       },
       {
-        "label" => "Temperature",
-        "bounds" => [dw*3/4,dh/4,radius],
-        "value" => "",
-        "complicationId" => Complications.COMPLICATION_TYPE_CURRENT_TEMPERATURE
+        "label" => "Stress",
+        "angle" => 180,
+        "value" => null as Null or Lang.Number,
+        "complicationId" => new Complications.Id(Complications.COMPLICATION_TYPE_STRESS)
       },
       {
         "label" => "Steps",
-        "bounds" => [dw/4,dh*3/4,radius],
+        "angle" => 45,
         "value" => "",
-        "complicationId" => Complications.COMPLICATION_TYPE_STEPS
+        "complicationId" => new Complications.Id(Complications.COMPLICATION_TYPE_STEPS)
       },
       {
         "label" => "BodyBatt",
-        "bounds" => [dw*3/4,dh*3/4,radius],
+        "angle" => 315,
         "value" => "",
-        "complicationId" => Complications.COMPLICATION_TYPE_BODY_BATTERY
+        "complicationId" => new Complications.Id(Complications.COMPLICATION_TYPE_BODY_BATTERY)
       }
     ];
 
@@ -109,13 +112,42 @@ public class WatchView extends Ui.WatchFace {
   function updateComplication(complication) {
 
     var thisComplication = Complications.getComplication(complication);
-    var thisType = thisComplication.getType();
 
-    for (var i=0; i < boundingBoxes.size(); i=i+1){
+    for (var i=0; i < radialData.size(); i=i+1){
 
-      if (thisType == boundingBoxes[i]["complicationId"]) {
-        boundingBoxes[i]["value"] = thisComplication.value;
-        boundingBoxes[i]["label"] = thisComplication.shortLabel;
+      if (complication == radialData[i]["complicationId"]) {
+        radialData[i]["value"] = thisComplication.value;
+        if (thisComplication.shortLabel != null){
+        radialData[i]["label"] = thisComplication.shortLabel;
+        } else {
+          radialData[i]["label"] = thisComplication.longLabel;
+        }
+      }
+
+    }
+
+    for (var i=0; i < sunData.size(); i=i+1){
+
+      if (complication == sunData[i]["complicationId"]) {
+        sunData[i]["value"] = thisComplication.value;
+        if (thisComplication.shortLabel != null){
+        sunData[i]["label"] = thisComplication.shortLabel;
+        } else {
+          sunData[i]["label"] = thisComplication.longLabel;
+        }
+      }
+
+    }
+
+    for (var i=0; i < xyData.size(); i=i+1){
+
+      if (complication == xyData[i]["complicationId"]) {
+        xyData[i]["value"] = thisComplication.value;
+        if (thisComplication.shortLabel != null){
+        xyData[i]["label"] = thisComplication.shortLabel;
+        } else {
+          xyData[i]["label"] = thisComplication.longLabel;
+        }
       }
 
     }
@@ -123,31 +155,115 @@ public class WatchView extends Ui.WatchFace {
   }
 
   // debug by drawing bounding boxes and labels
-  function drawBoundingBoxes(dc) {
+  function drawRadialData(dc) {
 
     dc.setPenWidth(1);
 
-    for (var i=0; i < boundingBoxes.size(); i=i+1){
+    if (radialData[1]["radius"] != null && false) {
+      dc.drawCircle(center_x, center_y, radialData[1]["radius"]);
+    }
+    for (var i=0; i < radialData.size(); i=i+1){
 
-      var x = boundingBoxes[i]["bounds"][0];
-      var y = boundingBoxes[i]["bounds"][1];
-      var r = boundingBoxes[i]["bounds"][2];
+      // var x = radialData[i]["bounds"][0];
+      // var y = radialData[i]["bounds"][1];
+      // var r = radialData[i]["bounds"][2];
 
-      // draw a circle
-      dc.setColor(Gfx.COLOR_PURPLE, Gfx.COLOR_PURPLE);
-      dc.drawCircle(x,y,r);
+      // // draw a circle
+      // dc.setColor(Gfx.COLOR_PURPLE, Gfx.COLOR_PURPLE);
+      // dc.drawCircle(x,y,r);
+
+      if (!radialData[i].hasKey("angle")){
+        continue;
+      }
 
       // draw the complication label and value
-      var value = boundingBoxes[i]["value"] ? boundingBoxes[i]["value"] : "-";
-      var label = boundingBoxes[i]["label"];
-      var font = Gfx.FONT_SYSTEM_TINY;
+      var value = radialData[i]["value"] ? radialData[i]["value"] : "-";
+      var label = radialData[i]["label"];
+      var font = Gfx.getVectorFont({:face=>["RobotoRegular","Swiss721Regular"], :size=>34});
 
-      dc.setColor(Gfx.COLOR_WHITE, Gfx.COLOR_TRANSPARENT);
-      dc.drawText(x,y-(dc.getFontHeight(font)),font,label.toString(),Gfx.TEXT_JUSTIFY_CENTER);
-      dc.drawText(x,y,font,value.toString(),Gfx.TEXT_JUSTIFY_CENTER);
+      dc.setColor(Gfx.COLOR_LT_GRAY, Gfx.COLOR_TRANSPARENT);
+      // dc.drawText(x,y-(dc.getFontHeight(font)),font,label.toString(),Gfx.TEXT_JUSTIFY_CENTER);
+      // dc.drawText(x,y,font,value.toString(),Gfx.TEXT_JUSTIFY_CENTER);
 
+      var tmplabel = "null";
+      if (label != null) {
+        tmplabel = label.toString();
+      }
+      var tmpval = "--";
+      if (value != null && value instanceof Lang.Number) {
+        tmpval = value.format(radialData[i]["format"]);
+      } else if (value != null && value instanceof Lang.Number && label.equals("STEPS")) {
+        // tmpval = value.toNumber().format(radialData[i]["format"]);
+        tmpval = Lang.format("$1$.$2$k", [(value/1000).format("%2d"), ((value % 1000)/100).format("%1d")]);
+      }
+      var text = Lang.format("$1$: $2$", [tmplabel, tmpval]);//tmplabel+": "+tmpval;
+      // } else {
+      //   if (Complications.getComplication(radialData[i]["complicationId"]).getType() == Complications.COMPLICATION_TYPE_INVALID){
+      //     System.println("Complication Invalid");
+      //   } else {
+      //     System.println("Idk...");
+      //   }
+      // }
+      var justification = Gfx.TEXT_JUSTIFY_CENTER;
+      var angle = radialData[i]["angle"];
+      var radius = angle <= 180 ? dw/2-(dc.getFontHeight(font)) : dw/2-2;
+      if (radialData[i]["radius"] == null){
+        radialData[i]["radius"] = dw/2-(dc.getFontHeight(font))-.04*dw;
+      }
+      var direction = angle <= 180 ? Gfx.RADIAL_TEXT_DIRECTION_CLOCKWISE : Gfx.RADIAL_TEXT_DIRECTION_COUNTER_CLOCKWISE;
+
+      dc.drawRadialText(center_x, center_y, font, text, justification, angle, radius, direction);
     }
 
+  }
+
+  function drawSunInfo(dc){
+    var radius = dh*.75;
+    var degreeStart = 120;
+    var degreeEnd = 60;
+    var direction = dc.ARC_CLOCKWISE;
+    var offset = dh*.9;
+    dc.setPenWidth(2);
+    dc.drawArc(center_x, center_y+offset, radius, direction, degreeStart, degreeEnd);
+
+    if (sunData[1]["value"] != null && sunData[0]["day_seconds"] >= sunData[0]["value"] && sunData[0]["day_seconds"] < sunData[1]["value"]){
+      var day_remain = (sunData[1]["value"]-sunData[0]["day_seconds"]);
+      var daylight_seconds = sunData[1]["value"]-sunData[0]["value"];
+      var angle_range = (degreeStart-degreeEnd).abs();
+      var angle_arc = day_remain*angle_range/daylight_seconds;
+      // angle_arc = angle_arc > 0 ? angle_arc : 1;
+      angle_arc = angle_arc >= angle_range ? angle_range : angle_arc+1;
+      dc.setPenWidth(10);
+      dc.setColor(Gfx.COLOR_YELLOW, Gfx.COLOR_TRANSPARENT);
+      dc.drawArc(center_x, center_y+offset, radius-5, direction, degreeStart, degreeStart-angle_arc);
+    }
+    dc.setColor(Gfx.COLOR_LT_GRAY, Gfx.COLOR_TRANSPARENT);
+
+    // var value = radialData[i]["value"] ? radialData[i]["value"] : "-";
+    var rise_str = "-";
+    var set_str = "-";
+    var font = Gfx.getVectorFont({:face=>["RobotoRegular","Swiss721Regular"], :size=>34});
+    direction = Gfx.RADIAL_TEXT_DIRECTION_CLOCKWISE;
+    if (sunData[0]["value"] != null){
+      var rise_hours = sunData[0]["value"]/3600;
+      // var rise_whole_hours = Math.floor(rise_hours);
+      var rise_mins = sunData[0]["value"] % 3600/60;
+      rise_str = ""+rise_hours.format("%02d")+":"+rise_mins.format("%02d");
+    }
+    if (sunData[1]["value"] != null){
+      var set_hours = sunData[1]["value"]/3600;
+      // var set_whole_hours = Math.floor(set_hours);
+      var set_mins = sunData[1]["value"] % 3600/60;
+      set_str = ""+set_hours.format("%02d")+":"+set_mins.format("%02d");
+    }
+
+    if (sunData[0]["radius"] == null){
+      sunData[0]["radius"] = radius;
+      sunData[0]["y_offset"] = offset;
+    }
+
+    dc.drawRadialText(center_x, center_y+offset, font, rise_str, Gfx.TEXT_JUSTIFY_RIGHT, degreeEnd, radius, direction);
+    dc.drawRadialText(center_x, center_y+offset, font, set_str, Gfx.TEXT_JUSTIFY_LEFT, degreeStart, radius, direction);
   }
 
 
