@@ -73,13 +73,46 @@ public var sunData = [
 public var xyData = [
   {
         "label" => "Date",
-        "xy" => [100,80],
+        "xy" => [50,20],
+        "center" => [-90,-30],
         "value" => null,
-        "complicationId" => new Complications.Id(Complications.COMPLICATION_TYPE_DATE)
-      }
+        "complicationId" => new Complications.Id(Complications.COMPLICATION_TYPE_WEEKDAY_MONTHDAY)
+      },
+      {
+        "label" => "HighLowTemp",
+        "xy" => [50,20],
+        "center" => [0,-110],
+        "value" => null,
+        "complicationId" => new Complications.Id(Complications.COMPLICATION_TYPE_HIGH_LOW_TEMPERATURE)
+      },
+      {
+        "label" => "CurrentTemp",
+        "xy" => [50,20],
+        "center" => [0,-85],
+        "value" => null,
+        "units" => "°F",
+        "format" => "%d",
+        "complicationId" => new Complications.Id(Complications.COMPLICATION_TYPE_CURRENT_TEMPERATURE)
+      },
+      // {
+      //   "label" => "Alt",
+      //   "xy" => [50,20],
+      //   "center" => [-50,120],
+      //   "value" => null,
+      //   "units" => "m",
+      //   "complicationId" => new Complications.Id(Complications.COMPLICATION_TYPE_ALTITUDE)
+      // },
+      // {
+      //   "label" => "RecoveryTime",
+      //   "xy" => [50,20],
+      //   "center" => [50,120],
+      //   "value" => null,
+      //   "units" => "h",
+      //   "complicationId" => new Complications.Id(Complications.COMPLICATION_TYPE_RECOVERY_TIME)
+      // }
 ];
 
-public function checkradialData(points) {
+public function checkRadialData(points) {
 
   // iterate through each bounding box
   for(var i=0;i<radialData.size();i++) {
@@ -98,17 +131,23 @@ public function checkradialData(points) {
   var x = points[0];
   var y = points[1];
 
-  Sys.println("Checking clock: "+x+", "+y);
-
-  if (x.abs() < 80 && y.abs() < 40){
-    return new Complications.Id(Complications.COMPLICATION_TYPE_DATE);
+  Sys.println("Checking XY: "+x+", "+y);
+  for (var i=0; i<xyData.size(); i++){
+    if ((xyData[i]["center"][0]-x).abs() < xyData[i]["xy"][0] && (xyData[i]["center"][1]-y).abs() < xyData[i]["xy"][1]){
+      return xyData[i]["complicationId"];
+    }
   }
+  
 
   y = y+sunData[0]["y_offset"];
   var click_radius = Math.sqrt(x*x + y*y);
 
   if ((click_radius-sunData[0]["radius"]).abs() < 40){
     return sunData[0]["complicationId"];
+  }
+
+  if (click_radius < sunData[0]["radius"]-40){
+    return xyData[1]["complicationId"];
   }
 
   // we didn't hit a bounding box
@@ -118,7 +157,7 @@ public function checkradialData(points) {
 
 // true if the points are contained within this boundingBox
 public function checkBoundsForComplication(points,angle,radius) {
-  return circContains(points,angle,radius);
+  return circContains(points,angle,radius*radius);
 }
 
 
@@ -129,7 +168,7 @@ public function circContains(points, angle, radius) {
     var point_angle = Math.atan2(y, x)*180/Math.PI;
 
     point_angle = point_angle < 0 ? point_angle+360 : point_angle;
-    var point_radius = Math.sqrt(x*x + y*y);
+    var point_radius = x*x + y*y;
 
     Sys.println("Angle: "+point_angle+" Radius: "+point_radius);
     Sys.println("Angle: "+angle+" Radius: "+radius);

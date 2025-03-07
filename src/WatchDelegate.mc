@@ -25,7 +25,7 @@ class WatchDelegate extends Ui.WatchFaceDelegate {
     Sys.println( "transformed x:" + co_ords[0] + ", y:" + co_ords[1]  );
 
     // returns the complicationId within the radialData
-    var complicationId = checkradialData(co_ords);
+    var complicationId = checkRadialData(co_ords);
 
     //
     if (complicationId != null) {

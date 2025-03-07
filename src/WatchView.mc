@@ -29,9 +29,6 @@ public class WatchView extends Ui.WatchFace {
     center_x = dw/2;
     center_y = dh/2;
 
-    // define the global bounding boxes
-    // defineradialData();
-
   }
 
   function onUpdate(dc) {
@@ -45,17 +42,20 @@ public class WatchView extends Ui.WatchFace {
 
     // define time, day, month variables
     var hour = clockTime.hour;
-    var minute = clockTime.min < 10 ? "0" + clockTime.min : clockTime.min;
+    var minute = clockTime.min;
+    var sec = clockTime.sec;
     var font = Gfx.FONT_SYSTEM_NUMBER_HOT;
     dc.setColor(Gfx.COLOR_LT_GRAY, Gfx.COLOR_TRANSPARENT);
-    dc.drawText(dw/2,dh/2-(dc.getFontHeight(font)/2),font,hour.toString()+":"+minute.toString(),Gfx.TEXT_JUSTIFY_CENTER);
+    dc.drawText(dw/2,dh/2-(dc.getFontHeight(font)/2)-20,font,Lang.format("$1$:$2$", [hour.format("%02d"), minute.format("%02d")]),Gfx.TEXT_JUSTIFY_CENTER);
+    dc.drawText(center_x+120, center_y+30, Gfx.getVectorFont({:face=>["RobotoRegular","Swiss721Regular"], :size=>34}), sec.format("%02d"), Gfx.TEXT_JUSTIFY_CENTER);
 
     if (hour instanceof Lang.Number && minute instanceof Lang.Number) {
-      sunData[0]["day_seconds"] = hour*3600+minute*60+clockTime.sec;
+      sunData[0]["day_seconds"] = hour*3600+minute*60+sec;
     }
     // draw bounding boxes (debug)
     drawRadialData(dc);
     drawSunInfo(dc);
+    drawXYData(dc);
 
   }
 
@@ -69,43 +69,6 @@ public class WatchView extends Ui.WatchFace {
   }
 
   function onEnterSleep() {
-  }
-
-  function defineradialData() {
-
-    // "bounds" format is an array as follows [ x, y, r ]
-    //  x,y = center of circle
-    //  r = radius
-
-    // var radius = dw/5;
-
-    radialData = [
-      {
-        "label" => "Heart Rate",
-        "angle" => 135,
-        "value" => "",
-        "complicationId" => new Complications.Id(Complications.COMPLICATION_TYPE_HEART_RATE)
-      },
-      {
-        "label" => "Stress",
-        "angle" => 180,
-        "value" => null as Null or Lang.Number,
-        "complicationId" => new Complications.Id(Complications.COMPLICATION_TYPE_STRESS)
-      },
-      {
-        "label" => "Steps",
-        "angle" => 45,
-        "value" => "",
-        "complicationId" => new Complications.Id(Complications.COMPLICATION_TYPE_STEPS)
-      },
-      {
-        "label" => "BodyBatt",
-        "angle" => 315,
-        "value" => "",
-        "complicationId" => new Complications.Id(Complications.COMPLICATION_TYPE_BODY_BATTERY)
-      }
-    ];
-
   }
 
   // callback that updates the complication value
@@ -243,7 +206,7 @@ public class WatchView extends Ui.WatchFace {
     var degreeEnd = degreeStart+(45*data["pct"]/100.0);
     var direction = dc.ARC_COUNTER_CLOCKWISE;
     dc.setPenWidth(10);
-    if (data["pct"]>75){
+    if (data["pct"]>60){
       dc.setColor(Gfx.COLOR_GREEN, Gfx.COLOR_TRANSPARENT);
     } else if (data["pct"]>30){
       dc.setColor(Gfx.COLOR_YELLOW, Gfx.COLOR_TRANSPARENT);
@@ -256,14 +219,14 @@ public class WatchView extends Ui.WatchFace {
 
   function drawSunInfo(dc){
     var radius = dh*.75;
-    var degreeStart = 120;
-    var degreeEnd = 60;
+    var degreeStart = 120+3;
+    var degreeEnd = 60-3;
     var direction = dc.ARC_CLOCKWISE;
     var offset = dh*.9;
     dc.setPenWidth(2);
     dc.drawArc(center_x, center_y+offset, radius, direction, degreeStart, degreeEnd);
 
-    if (sunData[1]["value"] != null && sunData[0]["value"] != null && sunData[0]["day_seconds"] >= sunData[0]["value"] && sunData[0]["day_seconds"] < sunData[1]["value"]){
+    if (sunData[1]["value"] != null && sunData[0]["value"] != null && sunData[0]["day_seconds"] != null && sunData[0]["day_seconds"] >= sunData[0]["value"] && sunData[0]["day_seconds"] < sunData[1]["value"]){
       var day_remain = (sunData[1]["value"]-sunData[0]["day_seconds"]);
       var daylight_seconds = sunData[1]["value"]-sunData[0]["value"];
       var angle_range = (degreeStart-degreeEnd).abs();
@@ -299,8 +262,27 @@ public class WatchView extends Ui.WatchFace {
       sunData[0]["y_offset"] = offset;
     }
 
-    dc.drawRadialText(center_x, center_y+offset, font, rise_str, Gfx.TEXT_JUSTIFY_RIGHT, degreeEnd, radius, direction);
-    dc.drawRadialText(center_x, center_y+offset, font, set_str, Gfx.TEXT_JUSTIFY_LEFT, degreeStart, radius, direction);
+    dc.drawRadialText(center_x, center_y+offset, font, rise_str, Gfx.TEXT_JUSTIFY_RIGHT, degreeEnd, 1.01*radius, direction);
+    dc.drawRadialText(center_x, center_y+offset, font, set_str, Gfx.TEXT_JUSTIFY_LEFT, degreeStart, 1.01*radius, direction);
+  }
+
+  function drawXYData(dc){
+    for (var i=0; i<xyData.size(); i++){
+      if (xyData[i]["value"] != null){
+        var x = center_x+xyData[i]["center"][0];
+        var y = center_y-xyData[i]["center"][1];
+        var font = Gfx.getVectorFont({:face=>["RobotoRegular","Swiss721Regular"], :size=>34});
+        var text = "";
+        if (xyData[i].hasKey("units") && xyData[i].hasKey("format")){
+          var val = xyData[i]["value"]*9/5+32;
+          text = Lang.format("$1$$2$", [val.format(xyData[i]["format"]), xyData[i]["units"]]);
+        } else {
+          text = xyData[i]["value"];
+        }
+        var justification = Gfx.TEXT_JUSTIFY_CENTER;
+        dc.drawText(x, y, font, text, justification);
+      }
+    }
   }
 
 
