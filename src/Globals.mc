@@ -1,12 +1,19 @@
 using Toybox.System as Sys;
 using Toybox.Complications as Complications;
 using Toybox.Math as Math;
+using Toybox.Weather as Weather;
+using Toybox.Timer as Timer;
+
 
 // globals for devices width and height
 public var dw = 0;
 public var dh = 0;
 public var center_x = 0;
 public var center_y = 0;
+
+//unit conversion
+public const m2ft = 3.28084;
+public const min2hr = 1/60.0;
 
 public var bboxes = [];
 public var radialData = [
@@ -28,7 +35,7 @@ public var radialData = [
       },
       {
         "label" => "Steps",
-        "angle" => 45,
+        "angle" => 0,
         "radius" => null,
         "value" => null,
         "format" => "%.1f",
@@ -36,11 +43,19 @@ public var radialData = [
       },
       {
         "label" => "BodyBatt",
-        "angle" => 0,
+        "angle" => 90,
         "radius" => null,
         "value" => null,
         "format" => "%3d",
         "complicationId" => new Complications.Id(Complications.COMPLICATION_TYPE_BODY_BATTERY)
+      },
+      {
+        "label" => "Floors",
+        "angle" => 45,
+        "radius" => null,
+        "value" => null,
+        "format" => "%2d",
+        "complicationId" => new Complications.Id(Complications.COMPLICATION_TYPE_FLOORS_CLIMBED)
       },
       {
         "label" => "Batt",
@@ -71,46 +86,84 @@ public var sunData = [
 ];
 
 public var xyData = [
-  {
-        "label" => "Date",
-        "xy" => [50,20],
-        "center" => [-90,-30],
-        "value" => null,
-        "complicationId" => new Complications.Id(Complications.COMPLICATION_TYPE_WEEKDAY_MONTHDAY)
-      },
-      {
-        "label" => "HighLowTemp",
-        "xy" => [50,20],
-        "center" => [0,-110],
-        "value" => null,
-        "complicationId" => new Complications.Id(Complications.COMPLICATION_TYPE_HIGH_LOW_TEMPERATURE)
-      },
-      {
-        "label" => "CurrentTemp",
-        "xy" => [50,20],
-        "center" => [0,-85],
-        "value" => null,
-        "units" => "°F",
-        "format" => "%d",
-        "complicationId" => new Complications.Id(Complications.COMPLICATION_TYPE_CURRENT_TEMPERATURE)
-      },
+  // {
+  //       "label" => "Date",
+  //       "xy" => [50,20],
+  //       "center" => [-90,-30],
+  //       "value" => null,
+  //       "complicationId" => new Complications.Id(Complications.COMPLICATION_TYPE_WEEKDAY_MONTHDAY)
+  //     },
       // {
-      //   "label" => "Alt",
+      //   "label" => "HighLowTemp",
       //   "xy" => [50,20],
-      //   "center" => [-50,120],
+      //   "center" => [0,-110],
       //   "value" => null,
-      //   "units" => "m",
-      //   "complicationId" => new Complications.Id(Complications.COMPLICATION_TYPE_ALTITUDE)
+      //   "complicationId" => new Complications.Id(Complications.COMPLICATION_TYPE_HIGH_LOW_TEMPERATURE)
       // },
       // {
-      //   "label" => "RecoveryTime",
+      //   "label" => "CurrentTemp",
       //   "xy" => [50,20],
-      //   "center" => [50,120],
+      //   "center" => [0,-85],
       //   "value" => null,
-      //   "units" => "h",
-      //   "complicationId" => new Complications.Id(Complications.COMPLICATION_TYPE_RECOVERY_TIME)
-      // }
+      //   "units" => "°F",
+      //   "format" => "%d",
+      //   "complicationId" => new Complications.Id(Complications.COMPLICATION_TYPE_CURRENT_TEMPERATURE)
+      // },
+      {
+        "label" => "Alt",
+        "xy" => [50,20],
+        "center" => [-75,110],
+        "value" => null,
+        "units" => "ft",
+        "conversion" => m2ft,
+        "format" => "%d",
+        "complicationId" => new Complications.Id(Complications.COMPLICATION_TYPE_ALTITUDE)
+      },
+      {
+        "label" => "TS",
+        "xy" => [50,20],
+        "center" => [0,145],
+        "value" => null,
+        "units" => "",
+        "complicationId" => new Complications.Id(Complications.COMPLICATION_TYPE_TRAINING_STATUS)
+      },
+      {
+        "label" => "RT",
+        "xy" => [50,20],
+        "center" => [85,110],
+        "value" => null,
+        "units" => "h",
+        "conversion" => min2hr,
+        "format" => "%d",
+        "complicationId" => new Complications.Id(Complications.COMPLICATION_TYPE_RECOVERY_TIME)
+      }
 ];
+
+var weatherId = new Complications.Id(Complications.COMPLICATION_TYPE_CURRENT_WEATHER);
+public var tempUnits = "°F";
+public var pressConversion = 1;
+public var weatherTimer = new Timer.Timer();
+public var weatherFlag = 0; //0 for current, 1 for hourly, 2 for daily?
+public var weatherDaily as Weather.CurrentConditions or Null;
+public var weatherHourly as Weather.CurrentConditions or Null;
+public var weatherCurrent as Weather.CurrentConditions or Null;// {
+//   :temp => {
+//     :hi => null,
+//     :low => null,
+//     :curr => null,
+//     :feels => null,
+//   },
+//   :wind => {
+//     :bearing => null,
+//     :speed => null,
+//   },
+//   :precip => null,
+//   :
+// }
+
+public function convertTemp(temp){
+  return (1.8*temp + 32);
+}
 
 public function checkRadialData(points) {
 
@@ -146,8 +199,9 @@ public function checkRadialData(points) {
     return sunData[0]["complicationId"];
   }
 
+  // Return a weather complication ID if battery and sun aren't hit
   if (click_radius < sunData[0]["radius"]-40){
-    return xyData[1]["complicationId"];
+    return weatherId;
   }
 
   // we didn't hit a bounding box

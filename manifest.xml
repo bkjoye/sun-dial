@@ -12,6 +12,7 @@
         <iq:barrels/>
         <iq:permissions>
             <iq:uses-permission id="ComplicationSubscriber"/>
+            <iq:uses-permission id="Positioning"/>
         </iq:permissions>
     </iq:application>
 </iq:manifest>
