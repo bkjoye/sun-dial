@@ -8,4 +8,6 @@
       <bitmap id="LauncherIcon" filename="launcher_icon.png" />
     </drawables>
 
+    <font id="WeatherIcon" filename="weather.fnt" antialias="true" />
+
 </resources>

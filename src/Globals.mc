@@ -3,6 +3,7 @@ using Toybox.Complications as Complications;
 using Toybox.Math as Math;
 using Toybox.Weather as Weather;
 using Toybox.Timer as Timer;
+using Toybox.Graphics as Gfx;
 
 
 // globals for devices width and height
@@ -19,6 +20,17 @@ public const min2hr = 1/60.0;
 public const deg2rad = Math.PI/180.0;
 public const mps2miph = 0.000621371*3600;
 public const pa2mmhg = 0.00750062;
+
+public const ts_colors = {
+  "PEAKING" => Gfx.COLOR_PURPLE,
+  "PRODUCTIVE" => Gfx.COLOR_GREEN,
+  "MAINTAINING" => Gfx.COLOR_YELLOW,
+  "RECOVERY" => Gfx.COLOR_BLUE,
+  "STRAINED" => Gfx.COLOR_PINK,
+  "UNPRODUCTIVE" => Gfx.COLOR_ORANGE,
+  "DETRAINING" => Gfx.COLOR_DK_GRAY,
+  "OVERREACHING" => Gfx.COLOR_RED
+};
 
 public var clockPosition = {
   "clock" => {
@@ -138,9 +150,8 @@ public var xyData = [
       {
         "label" => "TS",
         "xy" => [50,20],
-        "center" => [0,125],
+        "center" => [-75,125],
         "value" => null,
-        "units" => "",
         "complicationId" => new Complications.Id(Complications.COMPLICATION_TYPE_TRAINING_STATUS)
       },
       {
@@ -156,6 +167,7 @@ public var xyData = [
 ];
 
 var weatherId = new Complications.Id(Complications.COMPLICATION_TYPE_CURRENT_WEATHER);
+public var weatherFont;
 public var tempUnits = "°F";
 public var pressConversion = 1;
 public var weatherTimer = new Timer.Timer();

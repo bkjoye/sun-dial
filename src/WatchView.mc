@@ -18,6 +18,8 @@ using Toybox.Weather as Weather;
 
 public class WatchView extends Ui.WatchFace {
 
+  var iconMap = weatherIcons();
+
   function initialize() {
    Ui.WatchFace.initialize();
    getWeather();
@@ -31,6 +33,8 @@ public class WatchView extends Ui.WatchFace {
 
     center_x = dw/2;
     center_y = dh/2;
+
+    weatherFont = Ui.loadResource(Rez.Fonts.WeatherIcon);
   }
 
   function onUpdate(dc) {
@@ -341,6 +345,15 @@ public class WatchView extends Ui.WatchFace {
           text = Lang.format("$1$: $2$$3$", [tmplabel, val.format(xyData[i]["format"]), xyData[i]["units"]]);
         } else if (xyData[i].hasKey("units")) {
           text = Lang.format("$1$: $2$$3$", [tmplabel, xyData[i]["value"], xyData[i]["units"]]);
+        } else if (xyData[i]["label"].equals("TS")){
+          dc.drawText(x, y, font, tmplabel+":", Gfx.TEXT_JUSTIFY_RIGHT|Gfx.TEXT_JUSTIFY_VCENTER);
+          var key = xyData[i]["value"].toUpper();
+          if (ts_colors.hasKey(key)){
+            dc.setColor(ts_colors[key], Gfx.COLOR_TRANSPARENT);
+          }
+          dc.fillRoundedRectangle(x+4, y-10, 20, 20, 4);
+          dc.setColor(Gfx.COLOR_LT_GRAY, Gfx.COLOR_TRANSPARENT);
+          continue;
         } else {
           text = Lang.format("$1$: $2$", [tmplabel, xyData[i]["value"]]);
         }
@@ -390,6 +403,7 @@ public class WatchView extends Ui.WatchFace {
         dc.drawText(center_x+65, center_y+148, font_sm, 
                     Math.round(weatherCurrent.windSpeed*mps2miph).format("%d"), 
                     Gfx.TEXT_JUSTIFY_CENTER);
+        dc.drawText(center_x, center_y+125, weatherFont, iconMap[weatherCurrent.condition], Gfx.TEXT_JUSTIFY_CENTER);
       }
     } else if (weatherFlag == 1 && weatherHourly != null){
       dc.drawText(center_x, center_y+130, font, "Hourly Forecast", Gfx.TEXT_JUSTIFY_CENTER);
@@ -440,5 +454,65 @@ public class WatchView extends Ui.WatchFace {
     dc.setColor(Gfx.COLOR_RED, Gfx.COLOR_TRANSPARENT);
     dc.drawArc(center_x, center_y+sunData[0]["y_offset"], sunData[0]["radius"]+sunData[0]["touchzone"], Gfx.ARC_COUNTER_CLOCKWISE, 58, 122);
     dc.drawArc(center_x, center_y+sunData[0]["y_offset"], sunData[0]["radius"]-sunData[0]["touchzone"], Gfx.ARC_COUNTER_CLOCKWISE, 58, 122);
+  }
+
+  function weatherIcons(){
+    var mapping = [
+    "\uF00D",// CONDITION_CLEAR
+    "\uF00C",// CONDITION_PARTLY_CLOUDY
+    "\uF002",// CONDITION_MOSTLY_CLOUDY
+    "\uF01A",// CONDITION_RAIN
+    "\uF01B",// CONDITION_SNOW
+    "\uF011",// CONDITION_WINDY
+    "\uF01E",// CONDITION_THUNDERSTORMS
+    "\uF017",// CONDITION_WINTRY_MIX
+    "\uF014",// CONDITION_FOG
+    "\uF0B6",// CONDITION_HAZY
+    "\uF015",// CONDITION_HAIL
+    "\uF009",// CONDITION_SCATTERED_SHOWERS
+    "\uF00E",// CONDITION_SCATTERED_THUNDERSTORMS
+    "\uF03D",// CONDITION_UNKNOWN_PRECIPITATION
+    "\uF01C",// CONDITION_LIGHT_RAIN
+    "\uF019",// CONDITION_HEAVY_RAIN
+    "\uF01B",// CONDITION_LIGHT_SNOW
+    "\uF064",// CONDITION_HEAVY_SNOW
+    "\uF004",// CONDITION_LIGHT_RAIN_SNOW
+    "\uF007",// CONDITION_HEAVY_RAIN_SNOW
+    "\uF013",// CONDITION_CLOUDY
+    "\uF017",// CONDITION_RAIN_SNOW
+    "\uF002",// CONDITION_PARTLY_CLEAR
+    "\uF00C",// CONDITION_MOSTLY_CLEAR
+    "\uF009",// CONDITION_LIGHT_SHOWERS
+    "\uF006",// CONDITION_SHOWERS
+    "\uF008",// CONDITION_HEAVY_SHOWERS
+    "\uF00B",// CONDITION_CHANCE_OF_SHOWERS
+    "\uF01E",// CONDITION_CHANCE_OF_THUNDERSTORMS
+    "\uF021",// CONDITION_MIST
+    "\uF063",// CONDITION_DUST
+    "\uF006",// CONDITION_DRIZZLE
+    "\uF073",// CONDITION_TORNADO
+    "\uF062",// CONDITION_SMOKE
+    "\uF076",// CONDITION_ICE
+    "\uF082",// CONDITION_SAND
+    "\uF01E",// CONDITION_SQUALL
+    "\uF082",// CONDITION_SANDSTORM
+    "\uF0C8",// CONDITION_VOLCANIC_ASH
+    "\uF0B6",// CONDITION_HAZE
+    "\uF00C",// CONDITION_FAIR
+    "\uF073",// CONDITION_HURRICANE
+    "\uF01E",// CONDITION_TROPICAL_STORM
+    "\uF01B",// CONDITION_CHANCE_OF_SNOW
+    "\uF004",// CONDITION_CHANCE_OF_RAIN_SNOW
+    "\uF019",// CONDITION_CLOUDY_CHANCE_OF_RAIN
+    "\uF01B",// CONDITION_CLOUDY_CHANCE_OF_SNOW
+    "\uF004",// CONDITION_CLOUDY_CHANCE_OF_RAIN_SNOW
+    "\uF064",// CONDITION_FLURRIES
+    "\uF017",// CONDITION_FREEZING_RAIN
+    "\uF0B5",// CONDITION_SLEET
+    "\uF004",// CONDITION_ICE_SNOW
+    "\uF030",// CONDITION_THIN_CLOUDS
+    "\uF07B",// CONDITION_UNKNOWN
+    ];
+    return mapping;
   }
 }
