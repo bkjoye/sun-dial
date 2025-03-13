@@ -408,7 +408,21 @@ public class WatchView extends Ui.WatchFace {
     } else if (weatherFlag == 1 && weatherHourly != null){
       dc.drawText(center_x, center_y+130, font, "Hourly Forecast", Gfx.TEXT_JUSTIFY_CENTER);
     } else if (weatherFlag == 2 && weatherDaily != null){
-      dc.drawText(center_x, center_y+130, font, "Daily Forecast", Gfx.TEXT_JUSTIFY_CENTER);
+      var numDays = weatherDaily.size()-1;
+      var spacing = 60;
+      var offset = (numDays-1)*spacing/2.0;
+      for (var i=1; i<numDays+1; i++){
+        var position = (i-1)*spacing;
+        var dow = Gregorian.info(weatherDaily[i].forecastTime, Time.FORMAT_MEDIUM).day_of_week;
+        dc.drawText(center_x-offset+position, center_y+95, weatherFont, iconMap[weatherDaily[i].condition], Gfx.TEXT_JUSTIFY_CENTER);
+        dc.drawText(center_x-offset+position, center_y+150, font_sm, 
+                    Lang.format("$1$/$2$", 
+                                [convertTemp(weatherDaily[i].highTemperature).format("%d"), 
+                                 convertTemp(weatherDaily[i].lowTemperature).format("%d")]), 
+                    Gfx.TEXT_JUSTIFY_CENTER);
+        dc.drawText(center_x-offset+position, center_y+167, font_sm, dow.substring(null, 2), Gfx.TEXT_JUSTIFY_CENTER);
+      }
+      Sys.println("Days: "+weatherDaily.size());
     } else {
       dc.drawText(center_x, center_y+130, font, "No Weather Data", Gfx.TEXT_JUSTIFY_CENTER);
     }

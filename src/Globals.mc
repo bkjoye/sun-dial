@@ -4,6 +4,7 @@ using Toybox.Math as Math;
 using Toybox.Weather as Weather;
 using Toybox.Timer as Timer;
 using Toybox.Graphics as Gfx;
+using Toybox.Lang as Lang;
 
 
 // globals for devices width and height
@@ -172,8 +173,8 @@ public var tempUnits = "°F";
 public var pressConversion = 1;
 public var weatherTimer = new Timer.Timer();
 public var weatherFlag = 0; //0 for current, 1 for hourly, 2 for daily?
-public var weatherDaily as Weather.CurrentConditions or Null;
-public var weatherHourly as Weather.CurrentConditions or Null;
+public var weatherDaily as Lang.Array<Weather.DailyForecast> or Null;
+public var weatherHourly as Lang.Array<Weather.HourlyForecast> or Null;
 public var weatherCurrent as Weather.CurrentConditions or Null;// {
 
 public function convertTemp(temp){
