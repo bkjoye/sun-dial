@@ -11,6 +11,8 @@ public var dh = 0;
 public var center_x = 0;
 public var center_y = 0;
 
+public var drawZones = false;
+
 //unit conversion
 public const m2ft = 3.28084;
 public const min2hr = 1/60.0;
@@ -23,33 +25,35 @@ public var clockPosition = {
     "center" => [0, 20]
   },
   "date" => {
-    "center" => [-150, -30]
+    "center" => [-150, -50]
   },
   "seconds" => {
-    "center" => [120, -30]
+    "center" => [120, -50]
   }
 };
 
 public var touchZones = [
   {
     "label" => "WeatherScrollRight",
-    "xy" => [30, 30],
-    "center" => [60, 10],
+    "xy" => [70, 50],
+    "center" => [20, 20],
     "shift" => 1
   },
   {
     "label" => "WeatherScrollLeft",
-    "xy" => [30, 30],
-    "center" => [-60, 10],
+    "xy" => [70, 50],
+    "center" => [-160, 20],
     "shift" => -1
   },
   {
     "label" => "Date",
-    "xy" => [60, 30],
+    "xy" => [80, 20],
     "center" => clockPosition["date"]["center"],
     "complicationId" => new Complications.Id(Complications.COMPLICATION_TYPE_WEEKDAY_MONTHDAY)
   }
 ];
+
+public var radialTouchOffset = 10;
 public var radialData = [
       {
         "label" => "Heart Rate",
@@ -110,7 +114,8 @@ public var sunData = [
         "complicationId" => new Complications.Id(Complications.COMPLICATION_TYPE_SUNRISE),
         "radius" => null,
         "y_offset" => null,
-        "day_seconds" => null
+        "day_seconds" => null,
+        "touchzone" => 25
       },
       {
         "label" => "Sunset",
@@ -123,7 +128,7 @@ public var xyData = [
       {
         "label" => "Alt",
         "xy" => [50,20],
-        "center" => [-75,110],
+        "center" => [-75,90],
         "value" => null,
         "units" => "ft",
         "conversion" => m2ft,
@@ -133,7 +138,7 @@ public var xyData = [
       {
         "label" => "TS",
         "xy" => [50,20],
-        "center" => [0,145],
+        "center" => [0,125],
         "value" => null,
         "units" => "",
         "complicationId" => new Complications.Id(Complications.COMPLICATION_TYPE_TRAINING_STATUS)
@@ -141,7 +146,7 @@ public var xyData = [
       {
         "label" => "RT",
         "xy" => [50,20],
-        "center" => [85,110],
+        "center" => [85,90],
         "value" => null,
         "units" => "h",
         "conversion" => min2hr,
@@ -191,7 +196,8 @@ public function checkRadialData(points) {
   }
 
   for (var i=0; i<touchZones.size(); i++){
-    if ((touchZones[i]["center"][0]-x).abs() < touchZones[i]["xy"][0] 
+    if (x > touchZones[i]["center"][0] 
+          && (x-touchZones[i]["center"][0]) < 2*touchZones[i]["xy"][0] 
           && (touchZones[i]["center"][1]-y).abs() < touchZones[i]["xy"][1]){
       if (touchZones[i].hasKey("complicationId")){
         return touchZones[i]["complicationId"];
@@ -210,12 +216,12 @@ public function checkRadialData(points) {
   y = y+sunData[0]["y_offset"];
   var click_radius = Math.sqrt(x*x + y*y);
 
-  if ((click_radius-sunData[0]["radius"]).abs() < 30){
+  if ((click_radius-sunData[0]["radius"]).abs() < sunData[0]["touchzone"]){
     return sunData[0]["complicationId"];
   }
 
   // Return a weather complication ID if battery and sun aren't hit
-  if (click_radius < sunData[0]["radius"]-30){
+  if (click_radius < sunData[0]["radius"]-sunData[0]["touchzone"]){
     return weatherId;
   }
 

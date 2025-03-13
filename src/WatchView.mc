@@ -50,22 +50,22 @@ public class WatchView extends Ui.WatchFace {
     var font = Gfx.FONT_SYSTEM_NUMBER_HOT;
     dc.setColor(Gfx.COLOR_LT_GRAY, Gfx.COLOR_TRANSPARENT);
     dc.drawText(center_x+clockPosition["clock"]["center"][0],
-                center_y-(dc.getFontHeight(font)/2)-clockPosition["clock"]["center"][1],
+                center_y-clockPosition["clock"]["center"][1],
                 font,
                 Lang.format("$1$:$2$", [hour.format("%02d"), minute.format("%02d")]),
-                Gfx.TEXT_JUSTIFY_CENTER);
+                Gfx.TEXT_JUSTIFY_CENTER|Gfx.TEXT_JUSTIFY_VCENTER);
                 
     font = Gfx.getVectorFont({:face=>["RobotoRegular","Swiss721Regular"], :size=>34});
     dc.drawText(center_x+clockPosition["seconds"]["center"][0], 
                 center_y-clockPosition["seconds"]["center"][1], 
                 font, 
                 sec.format("%02d"), 
-                Gfx.TEXT_JUSTIFY_CENTER);
+                Gfx.TEXT_JUSTIFY_CENTER|Gfx.TEXT_JUSTIFY_VCENTER);
     dc.drawText(center_x+clockPosition["date"]["center"][0], 
                 center_y-clockPosition["date"]["center"][1], 
                 font, 
                 Lang.format("$1$, $2$ $3$", [clockTime.day_of_week, clockTime.month, clockTime.day]), 
-                Gfx.TEXT_JUSTIFY_LEFT);
+                Gfx.TEXT_JUSTIFY_LEFT|Gfx.TEXT_JUSTIFY_VCENTER);
 
     if (hour instanceof Lang.Number && minute instanceof Lang.Number) {
       sunData[0]["day_seconds"] = hour*3600+minute*60+sec;
@@ -75,7 +75,9 @@ public class WatchView extends Ui.WatchFace {
     drawSunInfo(dc);
     drawXYData(dc);
     drawWeather(dc);
-    drawTouchZones(dc);
+    if (drawZones){
+      drawTouchZones(dc);
+    }
 
     // weatherTimer.start(self.method(:getWeather), 20*60*1000, true);
   }
@@ -182,10 +184,6 @@ public class WatchView extends Ui.WatchFace {
   function drawRadialData(dc) {
 
     dc.setPenWidth(1);
-
-    if (radialData[1]["radius"] != null && false) {
-      dc.drawCircle(center_x, center_y, radialData[1]["radius"]);
-    }
     for (var i=0; i < radialData.size(); i=i+1){
 
       // var x = radialData[i]["bounds"][0];
@@ -206,8 +204,8 @@ public class WatchView extends Ui.WatchFace {
       var font = Gfx.getVectorFont({:face=>["RobotoRegular","Swiss721Regular"], :size=>34});
 
       dc.setColor(Gfx.COLOR_LT_GRAY, Gfx.COLOR_TRANSPARENT);
-      // dc.drawText(x,y-(dc.getFontHeight(font)),font,label.toString(),Gfx.TEXT_JUSTIFY_CENTER);
-      // dc.drawText(x,y,font,value.toString(),Gfx.TEXT_JUSTIFY_CENTER);
+      // dc.drawText(x,y-(dc.getFontHeight(font)),font,label.toString(),Gfx.TEXT_JUSTIFY_CENTER|Gfx.TEXT_JUSTIFY_VCENTER);
+      // dc.drawText(x,y,font,value.toString(),Gfx.TEXT_JUSTIFY_CENTER|Gfx.TEXT_JUSTIFY_VCENTER);
 
       var tmplabel = "null";
       if (label != null) {
@@ -246,7 +244,7 @@ public class WatchView extends Ui.WatchFace {
       var angle = radialData[i]["angle"];
       var radius = angle <= 180 ? dw/2-(dc.getFontHeight(font)) : dw/2-10;
       if (radialData[i]["radius"] == null){
-        radialData[i]["radius"] = dw/2-(dc.getFontHeight(font))-.04*dw;
+        radialData[i]["radius"] = dw/2-(dc.getFontHeight(font))-radialTouchOffset;
       }
       var direction = angle <= 180 ? Gfx.RADIAL_TEXT_DIRECTION_CLOCKWISE : Gfx.RADIAL_TEXT_DIRECTION_COUNTER_CLOCKWISE;
 
@@ -321,8 +319,10 @@ public class WatchView extends Ui.WatchFace {
       sunData[0]["y_offset"] = offset;
     }
 
-    dc.drawRadialText(center_x, center_y+offset, font, rise_str, Gfx.TEXT_JUSTIFY_RIGHT, degreeEnd, 1.01*radius, direction);
-    dc.drawRadialText(center_x, center_y+offset, font, set_str, Gfx.TEXT_JUSTIFY_LEFT, degreeStart, 1.01*radius, direction);
+    dc.drawRadialText(center_x, center_y+offset, font, rise_str, 
+                      Gfx.TEXT_JUSTIFY_RIGHT, degreeEnd, 1.01*radius, direction);
+    dc.drawRadialText(center_x, center_y+offset, font, set_str, 
+                      Gfx.TEXT_JUSTIFY_LEFT, degreeStart, 1.01*radius, direction);
   }
 
   function drawXYData(dc){
@@ -347,7 +347,7 @@ public class WatchView extends Ui.WatchFace {
       } else {
         text = tmplabel+": --";
       }
-      dc.drawText(x, y, font, text, Gfx.TEXT_JUSTIFY_CENTER);
+      dc.drawText(x, y, font, text, Gfx.TEXT_JUSTIFY_CENTER|Gfx.TEXT_JUSTIFY_VCENTER);
     }
   }
 
@@ -432,13 +432,13 @@ public class WatchView extends Ui.WatchFace {
     }
     dc.setColor(Gfx.COLOR_BLUE, Gfx.COLOR_TRANSPARENT);
     for (var i=0;i<touchZones.size();i++) {
-      dc.drawRectangle(center_x+touchZones[i]["center"][0]-touchZones[i]["xy"][0], 
+      dc.drawRectangle(center_x+touchZones[i]["center"][0], 
                         center_y-touchZones[i]["center"][1]-touchZones[i]["xy"][1],
                         touchZones[i]["xy"][0]*2,
                         touchZones[i]["xy"][1]*2);
     }
     dc.setColor(Gfx.COLOR_RED, Gfx.COLOR_TRANSPARENT);
-    dc.drawArc(center_x, center_y+sunData[0]["y_offset"], sunData[0]["radius"]+30, Gfx.ARC_COUNTER_CLOCKWISE, 58, 122);
-    dc.drawArc(center_x, center_y+sunData[0]["y_offset"], sunData[0]["radius"]-30, Gfx.ARC_COUNTER_CLOCKWISE, 58, 122);
+    dc.drawArc(center_x, center_y+sunData[0]["y_offset"], sunData[0]["radius"]+sunData[0]["touchzone"], Gfx.ARC_COUNTER_CLOCKWISE, 58, 122);
+    dc.drawArc(center_x, center_y+sunData[0]["y_offset"], sunData[0]["radius"]-sunData[0]["touchzone"], Gfx.ARC_COUNTER_CLOCKWISE, 58, 122);
   }
 }
