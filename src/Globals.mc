@@ -14,6 +14,9 @@ public var center_y = 0;
 //unit conversion
 public const m2ft = 3.28084;
 public const min2hr = 1/60.0;
+public const deg2rad = Math.PI/180.0;
+public const mps2miph = 0.000621371*3600;
+public const pa2mmhg = 0.00750062;
 
 public var bboxes = [];
 public var radialData = [
@@ -195,12 +198,12 @@ public function checkRadialData(points) {
   y = y+sunData[0]["y_offset"];
   var click_radius = Math.sqrt(x*x + y*y);
 
-  if ((click_radius-sunData[0]["radius"]).abs() < 40){
+  if ((click_radius-sunData[0]["radius"]).abs() < 30){
     return sunData[0]["complicationId"];
   }
 
   // Return a weather complication ID if battery and sun aren't hit
-  if (click_radius < sunData[0]["radius"]-40){
+  if (click_radius < sunData[0]["radius"]-30){
     return weatherId;
   }
 

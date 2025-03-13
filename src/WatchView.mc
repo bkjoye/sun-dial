@@ -67,23 +67,25 @@ public class WatchView extends Ui.WatchFace {
   }
 
   function onShow() {
-    weatherTimer.start(self.method(:getWeather), 20*60*1000, true);
+    // weatherTimer.start(self.method(:getWeather), 20*60*1000, true);
+    getWeather();
   }
 
   function onHide() {
-    weatherTimer.stop();
+    // weatherTimer.stop();
   }
 
   function onExitSleep() {
-    weatherTimer.start(self.method(:getWeather), 20*60*1000, true);
+    // weatherTimer.start(self.method(:getWeather), 20*60*1000, true);
+    getWeather();
   }
 
   function onEnterSleep() {
-    weatherTimer.stop();
+    // weatherTimer.stop();
   }
 
   function getWeather(){
-    Sys.println("Getting Weather");
+    // Sys.println("Getting Weather");
     // if (weatherFlag == 0){
       weatherCurrent = Weather.getCurrentConditions();
     // } else if (weatherFlag == 0){
@@ -245,9 +247,9 @@ public class WatchView extends Ui.WatchFace {
     var degreeEnd = degreeStart+(45*data["pct"]/100.0);
     var direction = dc.ARC_COUNTER_CLOCKWISE;
     dc.setPenWidth(10);
-    if (data["pct"]>60){
+    if (data["pct"]>66){
       dc.setColor(Gfx.COLOR_GREEN, Gfx.COLOR_TRANSPARENT);
-    } else if (data["pct"]>30){
+    } else if (data["pct"]>33){
       dc.setColor(Gfx.COLOR_YELLOW, Gfx.COLOR_TRANSPARENT);
     } else {
       dc.setColor(Gfx.COLOR_RED, Gfx.COLOR_TRANSPARENT);
@@ -338,12 +340,34 @@ public class WatchView extends Ui.WatchFace {
       dc.drawText(center_x, center_y+85, font, Lang.format("$1$$2$($3$)", [convertTemp(weatherCurrent.temperature).format("%d"), tempUnits, convertTemp(weatherCurrent.feelsLikeTemperature).format("%d")]), Gfx.TEXT_JUSTIFY_CENTER);
       dc.drawText(center_x-145, center_y+112, font_sm, Lang.format("H:$1$", [convertTemp(weatherCurrent.highTemperature).format("%d")]), Gfx.TEXT_JUSTIFY_LEFT);
       dc.drawText(center_x-145, center_y+130, font_sm, Lang.format("L:$1$", [convertTemp(weatherCurrent.lowTemperature).format("%d")]), Gfx.TEXT_JUSTIFY_LEFT);
-      dc.drawText(center_x-145, center_y+148, font_sm, Lang.format("$1$", [weatherCurrent.observationLocationName]), Gfx.TEXT_JUSTIFY_LEFT);
+      // dc.drawText(center_x-145, center_y+148, font_sm, Lang.format("$1$", [(weatherCurrent.pressure*pa2mmhg).format("%.1f")]), Gfx.TEXT_JUSTIFY_LEFT);
+      dc.drawText(center_x-145, center_y+148, font_sm, Lang.format("D:$1$", [convertTemp(weatherCurrent.dewPoint).format("%d")]), Gfx.TEXT_JUSTIFY_LEFT);
       dc.drawText(center_x+145, center_y+112, font_sm, Lang.format("H:$1$%", [weatherCurrent.relativeHumidity]), Gfx.TEXT_JUSTIFY_RIGHT);
       dc.drawText(center_x+145, center_y+130, font_sm, Lang.format("P:$1$%", [weatherCurrent.precipitationChance]), Gfx.TEXT_JUSTIFY_RIGHT);
       var wTime = Gregorian.info(weatherCurrent.observationTime, Time.FORMAT_SHORT);
-      dc.drawText(center_x+145, center_y+148, font_sm, Lang.format("$1$:$2$", [wTime.hour, wTime.min]), Gfx.TEXT_JUSTIFY_RIGHT);
+      dc.drawText(center_x+145, center_y+148, font_sm, Lang.format("$1$:$2$", [wTime.hour.format("%02d"), wTime.min.format("%02d")]), Gfx.TEXT_JUSTIFY_RIGHT);
+      if (weatherCurrent.windBearing != null){
+        drawArrow(dc, [center_x+65, center_y+132], weatherCurrent.windBearing);
+        dc.drawText(center_x+65, center_y+148, font_sm, Math.round(weatherCurrent.windSpeed*mps2miph).format("%d"), Gfx.TEXT_JUSTIFY_CENTER);
+      }
     }
+  }
+
+  function drawArrow(dc, center, rotation){
+    var pts = [[0,0], [5, -5], [0,15], [-5, -5]];
+    rotation *= -deg2rad;
+    var cos = Math.cos(rotation);
+    var sin = Math.sin(rotation);
+    for (var i = 0; i<pts.size(); i++){
+      var pts_rot = [null, null];
+      pts_rot[0] = pts[i][0]*cos + pts[i][1]*sin;
+      pts_rot[1] = pts[i][1]*cos - pts[i][0]*sin;
+
+      pts[i][0] = pts_rot[0] + center[0];
+      pts[i][1] = pts_rot[1] + center[1];
+    }
+    dc.fillPolygon(pts);
+    // dc.drawCircle(center[0], center[1], 15);
   }
 
 }
