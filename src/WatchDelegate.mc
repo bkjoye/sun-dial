@@ -19,8 +19,8 @@ class WatchDelegate extends Ui.WatchFaceDelegate {
     var co_ords = clickEvent.getCoordinates();
     Sys.println( "clickEvent x:" + co_ords[0] + ", y:" + co_ords[1]  );
 
-    co_ords[0] = co_ords[0]-dw/2;
-    co_ords[1] = -co_ords[1]+dh/2;
+    co_ords[0] = co_ords[0]-center_x;
+    co_ords[1] = -co_ords[1]+center_y;
 
     Sys.println( "transformed x:" + co_ords[0] + ", y:" + co_ords[1]  );
 

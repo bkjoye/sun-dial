@@ -18,7 +18,38 @@ public const deg2rad = Math.PI/180.0;
 public const mps2miph = 0.000621371*3600;
 public const pa2mmhg = 0.00750062;
 
-public var bboxes = [];
+public var clockPosition = {
+  "clock" => {
+    "center" => [0, 20]
+  },
+  "date" => {
+    "center" => [-150, -30]
+  },
+  "seconds" => {
+    "center" => [120, -30]
+  }
+};
+
+public var touchZones = [
+  {
+    "label" => "WeatherScrollRight",
+    "xy" => [30, 30],
+    "center" => [60, 10],
+    "shift" => 1
+  },
+  {
+    "label" => "WeatherScrollLeft",
+    "xy" => [30, 30],
+    "center" => [-60, 10],
+    "shift" => -1
+  },
+  {
+    "label" => "Date",
+    "xy" => [60, 30],
+    "center" => clockPosition["date"]["center"],
+    "complicationId" => new Complications.Id(Complications.COMPLICATION_TYPE_WEEKDAY_MONTHDAY)
+  }
+];
 public var radialData = [
       {
         "label" => "Heart Rate",
@@ -89,29 +120,6 @@ public var sunData = [
 ];
 
 public var xyData = [
-  // {
-  //       "label" => "Date",
-  //       "xy" => [50,20],
-  //       "center" => [-90,-30],
-  //       "value" => null,
-  //       "complicationId" => new Complications.Id(Complications.COMPLICATION_TYPE_WEEKDAY_MONTHDAY)
-  //     },
-      // {
-      //   "label" => "HighLowTemp",
-      //   "xy" => [50,20],
-      //   "center" => [0,-110],
-      //   "value" => null,
-      //   "complicationId" => new Complications.Id(Complications.COMPLICATION_TYPE_HIGH_LOW_TEMPERATURE)
-      // },
-      // {
-      //   "label" => "CurrentTemp",
-      //   "xy" => [50,20],
-      //   "center" => [0,-85],
-      //   "value" => null,
-      //   "units" => "°F",
-      //   "format" => "%d",
-      //   "complicationId" => new Complications.Id(Complications.COMPLICATION_TYPE_CURRENT_TEMPERATURE)
-      // },
       {
         "label" => "Alt",
         "xy" => [50,20],
@@ -150,19 +158,6 @@ public var weatherFlag = 0; //0 for current, 1 for hourly, 2 for daily?
 public var weatherDaily as Weather.CurrentConditions or Null;
 public var weatherHourly as Weather.CurrentConditions or Null;
 public var weatherCurrent as Weather.CurrentConditions or Null;// {
-//   :temp => {
-//     :hi => null,
-//     :low => null,
-//     :curr => null,
-//     :feels => null,
-//   },
-//   :wind => {
-//     :bearing => null,
-//     :speed => null,
-//   },
-//   :precip => null,
-//   :
-// }
 
 public function convertTemp(temp){
   return (1.8*temp + 32);
@@ -189,8 +184,25 @@ public function checkRadialData(points) {
 
   Sys.println("Checking XY: "+x+", "+y);
   for (var i=0; i<xyData.size(); i++){
-    if ((xyData[i]["center"][0]-x).abs() < xyData[i]["xy"][0] && (xyData[i]["center"][1]-y).abs() < xyData[i]["xy"][1]){
+    if ((xyData[i]["center"][0]-x).abs() < xyData[i]["xy"][0] 
+        && (xyData[i]["center"][1]-y).abs() < xyData[i]["xy"][1]){
       return xyData[i]["complicationId"];
+    }
+  }
+
+  for (var i=0; i<touchZones.size(); i++){
+    if ((touchZones[i]["center"][0]-x).abs() < touchZones[i]["xy"][0] 
+          && (touchZones[i]["center"][1]-y).abs() < touchZones[i]["xy"][1]){
+      if (touchZones[i].hasKey("complicationId")){
+        return touchZones[i]["complicationId"];
+      } else {
+        weatherFlag += touchZones[i]["shift"];
+        if (weatherFlag > 2){
+          weatherFlag = 0;
+        } else if (weatherFlag < 0){
+          weatherFlag = 2;
+        }
+      }
     }
   }
   
