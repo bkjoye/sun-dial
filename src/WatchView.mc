@@ -461,7 +461,7 @@ public class WatchView extends Ui.WatchFace {
     var font_sm = Gfx.getVectorFont({:face=>["RobotoRegular","Swiss721Regular"], :size=>22});
     var xi = 0;
     var yi = 0;
-    var yi1 = 0;
+    var yin = 0;
 
     var sortTemps = data[0].slice(null, num_points-1);
     sortTemps.sort(null);
@@ -479,10 +479,10 @@ public class WatchView extends Ui.WatchFace {
     for (var i=1; i<num_points; i++) {
       xi = x0+(i-1)*spacing;
       dc.drawText(xi+spacing, y0+2, font_sm, xs[i].toString(), Gfx.TEXT_JUSTIFY_CENTER);
-      yi1 = y0-h*(data[0][i]-minTemp)/tempRange;
+      yin = y0-h*(data[0][i]-minTemp)/tempRange;
       dc.setColor(Gfx.COLOR_RED, Gfx.COLOR_TRANSPARENT);
-      dc.drawLine(xi, yi, xi+spacing, yi1);
-      yi = yi1;
+      dc.drawLine(xi, yi, xi+spacing, yin);
+      yi = yin;
       dc.setColor(Gfx.COLOR_BLUE, Gfx.COLOR_TRANSPARENT);
       dc.drawLine(xi, y0-h*data[1][i-1]/100.0, xi+spacing, y0-h*data[1][i]/100.0);
       dc.setColor(Gfx.COLOR_LT_GRAY, Gfx.COLOR_TRANSPARENT);

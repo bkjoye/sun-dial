@@ -5,6 +5,7 @@ using Toybox.Weather as Weather;
 using Toybox.Timer as Timer;
 using Toybox.Graphics as Gfx;
 using Toybox.Lang as Lang;
+using Toybox.WatchUi as Ui;
 
 
 // globals for devices width and height
@@ -221,6 +222,7 @@ public function checkRadialData(points) {
         } else if (weatherFlag < 0){
           weatherFlag = 2;
         }
+        Ui.requestUpdate();
       }
     }
   }
