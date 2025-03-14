@@ -403,10 +403,19 @@ public class WatchView extends Ui.WatchFace {
         dc.drawText(center_x+65, center_y+148, font_sm, 
                     Math.round(weatherCurrent.windSpeed*mps2miph).format("%d"), 
                     Gfx.TEXT_JUSTIFY_CENTER);
-        dc.drawText(center_x, center_y+125, weatherFont, iconMap[weatherCurrent.condition], Gfx.TEXT_JUSTIFY_CENTER);
       }
+      dc.drawText(center_x, center_y+120, weatherFont, iconMap[weatherCurrent.condition], Gfx.TEXT_JUSTIFY_CENTER);
+
     } else if (weatherFlag == 1 && weatherHourly != null){
-      dc.drawText(center_x, center_y+130, font, "Hourly Forecast", Gfx.TEXT_JUSTIFY_CENTER);
+      var names = ["temperature", "precipitationChance", "relativeHumidity"];
+      var data = [[],[],[],[]];
+      for (var i=0; i<weatherHourly.size(); i++) {
+        data[0].add(weatherHourly[i].temperature);
+        data[1].add(weatherHourly[i].precipitationChance);
+        data[2].add(weatherHourly[i].relativeHumidity);
+        data[3].add(Gregorian.info(weatherHourly[i].forecastTime, Time.FORMAT_SHORT).hour);
+      }
+      drawForecastPlot(dc, 105, center_y+165, 2*(center_x-105), 50, data);
     } else if (weatherFlag == 2 && weatherDaily != null){
       var numDays = weatherDaily.size()-1;
       var spacing = 60;
@@ -422,7 +431,6 @@ public class WatchView extends Ui.WatchFace {
                     Gfx.TEXT_JUSTIFY_CENTER);
         dc.drawText(center_x-offset+position, center_y+167, font_sm, dow.substring(null, 2), Gfx.TEXT_JUSTIFY_CENTER);
       }
-      Sys.println("Days: "+weatherDaily.size());
     } else {
       dc.drawText(center_x, center_y+130, font, "No Weather Data", Gfx.TEXT_JUSTIFY_CENTER);
     }
@@ -443,6 +451,50 @@ public class WatchView extends Ui.WatchFace {
     }
     dc.fillPolygon(pts);
     // dc.drawCircle(center[0], center[1], 15);
+  }
+
+  function drawForecastPlot(dc, x0, y0, l, h, data){
+    var xs = data[3];
+    // data = data.slice(null,2);
+    var num_points = xs.size()>8 ? 8 : xs.size();
+    var spacing = l/(num_points-1);
+    var font_sm = Gfx.getVectorFont({:face=>["RobotoRegular","Swiss721Regular"], :size=>22});
+    var xi = 0;
+    var yi = 0;
+    var yi1 = 0;
+
+    var sortTemps = data[0].slice(null, num_points-1);
+    sortTemps.sort(null);
+    var maxTemp = sortTemps[sortTemps.size()-1];
+    var minTemp = sortTemps[0];
+    var tempRange = maxTemp-minTemp;
+
+    
+    dc.setPenWidth(2);
+    dc.drawLine(x0, y0, x0+l, y0);
+    dc.drawLine(x0, y0, x0, y0-h);
+    dc.drawLine(x0+l, y0, x0+l, y0-h);
+
+    yi = y0-h*(data[0][0]-minTemp)/tempRange;
+    for (var i=1; i<num_points; i++) {
+      xi = x0+(i-1)*spacing;
+      dc.drawText(xi+spacing, y0+2, font_sm, xs[i].toString(), Gfx.TEXT_JUSTIFY_CENTER);
+      yi1 = y0-h*(data[0][i]-minTemp)/tempRange;
+      dc.setColor(Gfx.COLOR_RED, Gfx.COLOR_TRANSPARENT);
+      dc.drawLine(xi, yi, xi+spacing, yi1);
+      yi = yi1;
+      dc.setColor(Gfx.COLOR_BLUE, Gfx.COLOR_TRANSPARENT);
+      dc.drawLine(xi, y0-h*data[1][i-1]/100.0, xi+spacing, y0-h*data[1][i]/100.0);
+      dc.setColor(Gfx.COLOR_LT_GRAY, Gfx.COLOR_TRANSPARENT);
+      dc.drawLine(xi, y0-h*data[2][i-1]/100.0, xi+spacing, y0-h*data[2][i]/100.0);
+    }
+    dc.drawText(x0, y0+2, font_sm, xs[0].toString(), Gfx.TEXT_JUSTIFY_CENTER);
+    dc.setColor(Gfx.COLOR_RED, Gfx.COLOR_TRANSPARENT);
+    dc.drawText(x0-4, y0-5, font_sm, convertTemp(minTemp).format("%d"), Gfx.TEXT_JUSTIFY_RIGHT|Gfx.TEXT_JUSTIFY_VCENTER);
+    dc.drawText(x0-4, y0-h+8, font_sm, convertTemp(maxTemp).format("%d"), Gfx.TEXT_JUSTIFY_RIGHT|Gfx.TEXT_JUSTIFY_VCENTER);
+    dc.setColor(Gfx.COLOR_LT_GRAY, Gfx.COLOR_TRANSPARENT);
+    dc.drawText(x0+l+4, y0-5, font_sm, "0%", Gfx.TEXT_JUSTIFY_LEFT|Gfx.TEXT_JUSTIFY_VCENTER);
+    dc.drawText(x0+l+4, y0-h+8, font_sm, "100%", Gfx.TEXT_JUSTIFY_LEFT|Gfx.TEXT_JUSTIFY_VCENTER);
   }
 
   function drawTouchZones(dc){
