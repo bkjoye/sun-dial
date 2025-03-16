@@ -132,7 +132,7 @@ public class WatchView extends Ui.WatchFace {
           radialData[i]["value"] = thisComplication.value;
         }
         if (thisComplication.shortLabel != null){
-        radialData[i]["label"] = thisComplication.shortLabel;
+          radialData[i]["label"] = thisComplication.shortLabel;
         } else {
           radialData[i]["label"] = thisComplication.longLabel;
         }
@@ -463,7 +463,7 @@ public class WatchView extends Ui.WatchFace {
     var yi = 0;
     var yin = 0;
 
-    var sortTemps = data[0].slice(null, num_points-1);
+    var sortTemps = data[0].slice(null, num_points);
     sortTemps.sort(null);
     var maxTemp = sortTemps[sortTemps.size()-1];
     var minTemp = sortTemps[0];
@@ -471,9 +471,6 @@ public class WatchView extends Ui.WatchFace {
 
     
     dc.setPenWidth(2);
-    dc.drawLine(x0, y0, x0+l, y0);
-    dc.drawLine(x0, y0, x0, y0-h);
-    dc.drawLine(x0+l, y0, x0+l, y0-h);
 
     yi = y0-h*(data[0][0]-minTemp)/tempRange;
     for (var i=1; i<num_points; i++) {
@@ -495,6 +492,9 @@ public class WatchView extends Ui.WatchFace {
     dc.setColor(Gfx.COLOR_LT_GRAY, Gfx.COLOR_TRANSPARENT);
     dc.drawText(x0+l+4, y0-5, font_sm, "0%", Gfx.TEXT_JUSTIFY_LEFT|Gfx.TEXT_JUSTIFY_VCENTER);
     dc.drawText(x0+l+4, y0-h+8, font_sm, "100%", Gfx.TEXT_JUSTIFY_LEFT|Gfx.TEXT_JUSTIFY_VCENTER);
+    dc.drawLine(x0, y0, x0+l, y0);
+    dc.drawLine(x0, y0, x0, y0-h);
+    dc.drawLine(x0+l, y0, x0+l, y0-h);
   }
 
   function drawTouchZones(dc){
