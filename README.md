@@ -10,6 +10,6 @@ Also need to normalize the hardcoded spacing/positions/font sizes to scale with 
 
 Has 3 weather views that you can scroll through by holding the hours/minutes.
 
-![Current Weather](screenshot.png | width=100)
-![Hourly Forecast](screenshot2.png | width=100)
-![Daily Forecast](screenshot3.png | width=100)
+<img src="screenshot.png" width="100">
+<img src="screenshot2.png" width="100">
+<img src="screenshot3.png" width="100">
