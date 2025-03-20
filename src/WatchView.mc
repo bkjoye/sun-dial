@@ -110,9 +110,32 @@ public class WatchView extends Ui.WatchFace {
       weatherCurrent = Weather.getCurrentConditions();
     // } else if (weatherFlag == 0){
       weatherHourly = Weather.getHourlyForecast();
+      normalizeHourlyData();
     // } else {
       weatherDaily = Weather.getDailyForecast();
     // }
+  }
+
+  function normalizeHourlyData(){
+    forecast_data = [[],[],[],[]];
+    for (var i=0; i<weatherHourly.size(); i++) {
+      forecast_data[0].add(weatherHourly[i].temperature);
+      forecast_data[1].add(weatherHourly[i].precipitationChance);
+      forecast_data[2].add(weatherHourly[i].relativeHumidity);
+      forecast_data[3].add(Gregorian.info(weatherHourly[i].forecastTime, Time.FORMAT_SHORT).hour);
+    }
+
+    var sortTemps = forecast_data[0];
+    sortTemps.sort(null);
+    maxTemp = sortTemps[sortTemps.size()-1];
+    minTemp = sortTemps[0];
+    var tempRange = maxTemp == minTemp ? 1 : maxTemp-minTemp;
+
+    for (var i=0; i<forecast_data[0].size(); i++) {
+      forecast_data[0][i] = (forecast_data[0][i]-minTemp)/tempRange;
+      forecast_data[1][i] = forecast_data[1][i]/100.0;
+      forecast_data[2][i] = forecast_data[2][i]/100.0;
+    }
   }
 
 
@@ -285,18 +308,22 @@ public class WatchView extends Ui.WatchFace {
 
     if (sunData[1]["value"] != null 
         && sunData[0]["value"] != null 
-        && sunData[0]["day_seconds"] != null 
-        && sunData[0]["day_seconds"] >= sunData[0]["value"] 
-        && sunData[0]["day_seconds"] < sunData[1]["value"]){
-      var day_remain = (sunData[1]["value"]-sunData[0]["day_seconds"]);
-      var daylight_seconds = sunData[1]["value"]-sunData[0]["value"];
-      var angle_range = (degreeStart-degreeEnd).abs();
-      var angle_arc = day_remain*angle_range/daylight_seconds;
-      // angle_arc = angle_arc > 0 ? angle_arc : 1;
-      angle_arc = angle_arc >= angle_range ? angle_range : angle_arc+1;
-      dc.setPenWidth(10);
-      dc.setColor(Gfx.COLOR_YELLOW, Gfx.COLOR_TRANSPARENT);
-      dc.drawArc(center_x, center_y+offset, radius-5, direction, degreeStart, degreeStart-angle_arc);
+        && sunData[0]["day_seconds"] != null) {
+      if (sunData[0]["day_seconds"] >= sunData[0]["value"] 
+          && sunData[0]["day_seconds"] < sunData[1]["value"]) {
+        var day_remain = (sunData[1]["value"]-sunData[0]["day_seconds"]);
+        var daylight_seconds = sunData[1]["value"]-sunData[0]["value"];
+        var angle_range = (degreeStart-degreeEnd).abs();
+        var angle_arc = day_remain*angle_range/daylight_seconds;
+        // angle_arc = angle_arc > 0 ? angle_arc : 1;
+        angle_arc = angle_arc >= angle_range ? angle_range : angle_arc+1;
+        dc.setPenWidth(10);
+        dc.setColor(Gfx.COLOR_YELLOW, Gfx.COLOR_TRANSPARENT);
+        dc.drawArc(center_x, center_y+offset, radius-5, direction, degreeStart, degreeStart-angle_arc);
+        isDayTime = true;
+      } else {
+        isDayTime = false;
+      }
     }
     dc.setColor(Gfx.COLOR_LT_GRAY, Gfx.COLOR_TRANSPARENT);
 
@@ -346,14 +373,17 @@ public class WatchView extends Ui.WatchFace {
         } else if (xyData[i].hasKey("units")) {
           text = Lang.format("$1$: $2$$3$", [tmplabel, xyData[i]["value"], xyData[i]["units"]]);
         } else if (xyData[i]["label"].equals("TS")){
-          dc.drawText(x, y, font, tmplabel+":", Gfx.TEXT_JUSTIFY_RIGHT|Gfx.TEXT_JUSTIFY_VCENTER);
           var key = xyData[i]["value"].toUpper();
-          if (ts_colors.hasKey(key)){
+          if (isDayTime && ts_colors.hasKey(key)){
+            dc.drawText(x, y, font, tmplabel+":", Gfx.TEXT_JUSTIFY_RIGHT|Gfx.TEXT_JUSTIFY_VCENTER);
             dc.setColor(ts_colors[key], Gfx.COLOR_TRANSPARENT);
+            dc.fillRoundedRectangle(x+4, y-10, 20, 20, 4);
+            dc.setColor(Gfx.COLOR_LT_GRAY, Gfx.COLOR_TRANSPARENT);
+            continue;
+          } else {
+            text = Lang.format("$1$: $2$", [tmplabel, xyData[i]["value"].substring(null,2)]);
           }
-          dc.fillRoundedRectangle(x+4, y-10, 20, 20, 4);
-          dc.setColor(Gfx.COLOR_LT_GRAY, Gfx.COLOR_TRANSPARENT);
-          continue;
+          
         } else {
           text = Lang.format("$1$: $2$", [tmplabel, xyData[i]["value"]]);
         }
@@ -407,15 +437,7 @@ public class WatchView extends Ui.WatchFace {
       dc.drawText(center_x, center_y+120, weatherFont, iconMap[weatherCurrent.condition], Gfx.TEXT_JUSTIFY_CENTER);
 
     } else if (weatherFlag == 1 && weatherHourly != null){
-      var names = ["temperature", "precipitationChance", "relativeHumidity"];
-      var data = [[],[],[],[]];
-      for (var i=0; i<weatherHourly.size(); i++) {
-        data[0].add(weatherHourly[i].temperature);
-        data[1].add(weatherHourly[i].precipitationChance);
-        data[2].add(weatherHourly[i].relativeHumidity);
-        data[3].add(Gregorian.info(weatherHourly[i].forecastTime, Time.FORMAT_SHORT).hour);
-      }
-      drawForecastPlot(dc, 105, center_y+165, 2*(center_x-105), 50, data);
+      drawForecastPlot(dc, 105, center_y+165, 2*(center_x-105), 50, forecast_data);
     } else if (weatherFlag == 2 && weatherDaily != null){
       var numDays = weatherDaily.size()-1;
       var spacing = 60;
@@ -456,34 +478,38 @@ public class WatchView extends Ui.WatchFace {
   function drawForecastPlot(dc, x0, y0, l, h, data){
     var xs = data[3];
     // data = data.slice(null,2);
-    var num_points = xs.size()>8 ? 8 : xs.size();
-    var spacing = l/(num_points-1);
+    var num_points = xs.size();//>8 ? 8 : xs.size();
+    var spacing = l*1.0/(num_points-1);
     var font_sm = Gfx.getVectorFont({:face=>["RobotoRegular","Swiss721Regular"], :size=>22});
     var xi = 0;
     var yi = 0;
     var yin = 0;
+    var x_write_int = 3;
 
-    var sortTemps = data[0].slice(null, num_points);
-    sortTemps.sort(null);
-    var maxTemp = sortTemps[sortTemps.size()-1];
-    var minTemp = sortTemps[0];
-    var tempRange = maxTemp-minTemp;
+    // var sortTemps = data[0].slice(null, num_points);
+    // sortTemps.sort(null);
+    // var maxTemp = sortTemps[sortTemps.size()-1];
+    // var minTemp = sortTemps[0];
+    // var tempRange = maxTemp-minTemp;
 
     
     dc.setPenWidth(2);
 
-    yi = y0-h*(data[0][0]-minTemp)/tempRange;
+    yi = y0-h*data[0][0];
     for (var i=1; i<num_points; i++) {
       xi = x0+(i-1)*spacing;
-      dc.drawText(xi+spacing, y0+2, font_sm, xs[i].toString(), Gfx.TEXT_JUSTIFY_CENTER);
-      yin = y0-h*(data[0][i]-minTemp)/tempRange;
+      if (i % x_write_int == 0) {
+        dc.drawText(xi+spacing, y0+2, font_sm, xs[i].toString(), Gfx.TEXT_JUSTIFY_CENTER);
+      }
+      dc.drawLine(xi, y0, xi, y0-h*.1);
+      yin = y0-h*data[0][i];
       dc.setColor(Gfx.COLOR_RED, Gfx.COLOR_TRANSPARENT);
       dc.drawLine(xi, yi, xi+spacing, yin);
       yi = yin;
       dc.setColor(Gfx.COLOR_BLUE, Gfx.COLOR_TRANSPARENT);
-      dc.drawLine(xi, y0-h*data[1][i-1]/100.0, xi+spacing, y0-h*data[1][i]/100.0);
+      dc.drawLine(xi, y0-h*data[1][i-1], xi+spacing, y0-h*data[1][i]);
       dc.setColor(Gfx.COLOR_LT_GRAY, Gfx.COLOR_TRANSPARENT);
-      dc.drawLine(xi, y0-h*data[2][i-1]/100.0, xi+spacing, y0-h*data[2][i]/100.0);
+      dc.drawLine(xi, y0-h*data[2][i-1], xi+spacing, y0-h*data[2][i]);
     }
     dc.drawText(x0, y0+2, font_sm, xs[0].toString(), Gfx.TEXT_JUSTIFY_CENTER);
     dc.setColor(Gfx.COLOR_RED, Gfx.COLOR_TRANSPARENT);

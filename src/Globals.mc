@@ -23,6 +23,8 @@ public const deg2rad = Math.PI/180.0;
 public const mps2miph = 0.000621371*3600;
 public const pa2mmhg = 0.00750062;
 
+public var isDayTime = true;
+
 public const ts_colors = {
   "PEAKING" => Gfx.COLOR_PURPLE,
   "PRODUCTIVE" => Gfx.COLOR_GREEN,
@@ -176,6 +178,9 @@ public var weatherTimer = new Timer.Timer();
 public var weatherFlag = 0; //0 for current, 1 for hourly, 2 for daily?
 public var weatherDaily as Lang.Array<Weather.DailyForecast> or Null;
 public var weatherHourly as Lang.Array<Weather.HourlyForecast> or Null;
+public var forecast_data = [[],[],[],[]];
+public var minTemp = 0;
+public var maxTemp = 1;
 public var weatherCurrent as Weather.CurrentConditions or Null;// {
 
 public function convertTemp(temp){
