@@ -56,7 +56,9 @@ public class WatchApp extends App.AppBase {
             try {
                 WatchView.updateComplication(complicationId);
             } catch (e) {
-                Sys.println("error passing complicaiton to watchface");
+                if (drawZones) {
+                	Sys.println("error passing complicaiton to watchface");
+                }
             }
         }
     }

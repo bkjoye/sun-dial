@@ -18,7 +18,7 @@ using Toybox.Weather as Weather;
 
 public class WatchView extends Ui.WatchFace {
 
-  var iconMap = weatherIcons();
+  var iconMap = null;//weatherIcons();
 
   function initialize() {
    Ui.WatchFace.initialize();
@@ -105,6 +105,7 @@ public class WatchView extends Ui.WatchFace {
   }
 
   function getWeather(){
+    iconMap = weatherIcons();
     // Sys.println("Getting Weather");
     // if (weatherFlag == 0){
       weatherCurrent = Weather.getCurrentConditions();
@@ -605,6 +606,28 @@ public class WatchView extends Ui.WatchFace {
     "\uF030",// CONDITION_THIN_CLOUDS
     "\uF07B",// CONDITION_UNKNOWN
     ];
+
+    if (!isDayTime){
+      mapping[0] = "\uF02E";// CONDITION_CLEAR (Night)
+      mapping[1] = "\uF081";// CONDITION_PARTLY_CLOUDY (Night)
+      mapping[2] = "\uF086";// CONDITION_MOSTLY_CLOUDY (Night)
+      mapping[11] = "\uF029";// CONDITION_SCATTERED_SHOWERS (Night)
+      mapping[12] = "\uF02C";// CONDITION_SCATTERED_THUNDERSTORMS (Night)
+      mapping[18] = "\uF024";// CONDITION_LIGHT_RAIN_SNOW (Night)
+      mapping[19] = "\uF027";// CONDITION_HEAVY_RAIN_SNOW (Night)
+      mapping[22] = "\uF086";// CONDITION_PARTLY_CLEAR (Night)
+      mapping[23] = "\uF081";// CONDITION_MOSTLY_CLEAR (Night)
+      mapping[24] = "\uF029";// CONDITION_LIGHT_SHOWERS (Night)
+      mapping[25] = "\uF026";// CONDITION_SHOWERS (Night)
+      mapping[26] = "\uF028";// CONDITION_HEAVY_SHOWERS (Night)
+      mapping[27] = "\uF02B";// CONDITION_CHANCE_OF_SHOWERS (Night)
+      mapping[31] = "\uF026";// CONDITION_DRIZZLE (Night)
+      mapping[40] = "\uF081";// CONDITION_FAIR (Night)
+      mapping[44] = "\uF024";// CONDITION_CHANCE_OF_RAIN_SNOW (Night)
+      mapping[47] = "\uF024";// CONDITION_CLOUDY_CHANCE_OF_RAIN_SNOW (Night)
+      mapping[51] = "\uF024";// CONDITION_ICE_SNOW (Night)
+
+    }
     return mapping;
   }
 }

@@ -193,7 +193,9 @@ public function checkRadialData(points) {
   for(var i=0;i<radialData.size();i++) {
 
     var currentBounds = radialData[i];
-    Sys.println("checking bounding box: " + currentBounds["label"]);
+    if (drawZones) {
+    	Sys.println("checking bounding box: " + currentBounds["label"]);
+    }
 
     // check if the current bounding box has been hit,
     // if so, return the corresponding complication
@@ -206,7 +208,9 @@ public function checkRadialData(points) {
   var x = points[0];
   var y = points[1];
 
-  Sys.println("Checking XY: "+x+", "+y);
+  if (drawZones) {
+  	Sys.println("Checking XY: "+x+", "+y);
+  }
   for (var i=0; i<xyData.size(); i++){
     if ((xyData[i]["center"][0]-x).abs() < xyData[i]["xy"][0] 
         && (xyData[i]["center"][1]-y).abs() < xyData[i]["xy"][1]){
@@ -265,8 +269,12 @@ public function circContains(points, angle, radius) {
     point_angle = point_angle < 0 ? point_angle+360 : point_angle;
     var point_radius = x*x + y*y;
 
-    Sys.println("Angle: "+point_angle+" Radius: "+point_radius);
-    Sys.println("Angle: "+angle+" Radius: "+radius);
+    if (drawZones) {
+    	Sys.println("Angle: "+point_angle+" Radius: "+point_radius);
+    }
+    if (drawZones) {
+    	Sys.println("Angle: "+angle+" Radius: "+radius);
+    }
 
     if ((point_angle-angle).abs() < 22.5 && point_radius > radius) {
       return true;
