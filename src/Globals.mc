@@ -37,136 +37,136 @@ public const ts_colors = {
 };
 
 public var clockPosition = {
-  "clock" => {
-    "center" => [0, 20]
+  :clock => {
+    :center => [0, 20]
   },
-  "date" => {
-    "center" => [-150, -50]
+  :date => {
+    :center => [-150, -50]
   },
-  "seconds" => {
-    "center" => [120, -50]
+  :seconds => {
+    :center => [120, -50]
   }
 };
 
 public var touchZones = [
   {
-    "label" => "WeatherScrollRight",
-    "xy" => [70, 50],
-    "center" => [20, 20],
-    "shift" => 1
+    :label => "WeatherScrollRight",
+    :xy => [70, 50],
+    :center => [20, 20],
+    :shift => 1
   },
   {
-    "label" => "WeatherScrollLeft",
-    "xy" => [70, 50],
-    "center" => [-160, 20],
-    "shift" => -1
+    :label => "WeatherScrollLeft",
+    :xy => [70, 50],
+    :center => [-160, 20],
+    :shift => -1
   },
   {
-    "label" => "Date",
-    "xy" => [80, 20],
-    "center" => clockPosition["date"]["center"],
-    "complicationId" => new Complications.Id(Complications.COMPLICATION_TYPE_WEEKDAY_MONTHDAY)
+    :label => "Date",
+    :xy => [80, 20],
+    :center => clockPosition[:date][:center],
+    :complicationId => new Complications.Id(Complications.COMPLICATION_TYPE_WEEKDAY_MONTHDAY)
   }
 ];
 
 public var radialTouchOffset = 10;
 public var radialData = [
       {
-        "label" => "Heart Rate",
-        "angle" => 135,
-        "radius" => null,
-        "value" => null,
-        "format" => "%3d",
-        "complicationId" => new Complications.Id(Complications.COMPLICATION_TYPE_HEART_RATE)
+        :label => "Heart Rate",
+        :angle => 135,
+        :radius => null,
+        :value => null,
+        :format => "%3d",
+        :complicationId => new Complications.Id(Complications.COMPLICATION_TYPE_HEART_RATE)
       },
       {
-        "label" => "Stress",
-        "angle" => 180,
-        "radius" => null,
-        "value" => null,
-        "format" => "%3d",
-        "complicationId" => new Complications.Id(Complications.COMPLICATION_TYPE_STRESS)
+        :label => "Stress",
+        :angle => 180,
+        :radius => null,
+        :value => null,
+        :format => "%3d",
+        :complicationId => new Complications.Id(Complications.COMPLICATION_TYPE_STRESS)
       },
       {
-        "label" => "Steps",
-        "angle" => 0,
-        "radius" => null,
-        "value" => null,
-        "format" => "%.1f",
-        "complicationId" => new Complications.Id(Complications.COMPLICATION_TYPE_STEPS)
+        :label => "Steps",
+        :angle => 0,
+        :radius => null,
+        :value => null,
+        :format => "%.1f",
+        :complicationId => new Complications.Id(Complications.COMPLICATION_TYPE_STEPS)
       },
       {
-        "label" => "BodyBatt",
-        "angle" => 90,
-        "radius" => null,
-        "value" => null,
-        "format" => "%3d",
-        "complicationId" => new Complications.Id(Complications.COMPLICATION_TYPE_BODY_BATTERY)
+        :label => "BodyBatt",
+        :angle => 90,
+        :radius => null,
+        :value => null,
+        :format => "%3d",
+        :complicationId => new Complications.Id(Complications.COMPLICATION_TYPE_BODY_BATTERY)
       },
       {
-        "label" => "Floors",
-        "angle" => 45,
-        "radius" => null,
-        "value" => null,
-        "format" => "%2d",
-        "complicationId" => new Complications.Id(Complications.COMPLICATION_TYPE_FLOORS_CLIMBED)
+        :label => "Floors",
+        :angle => 45,
+        :radius => null,
+        :value => null,
+        :format => "%2d",
+        :complicationId => new Complications.Id(Complications.COMPLICATION_TYPE_FLOORS_CLIMBED)
       },
       {
-        "label" => "Batt",
-        "angle" => 270,
-        "radius" => null,
-        "value" => null,
-        "format" => "%3d",
-        "days" => null,
-        "pct" => null,
-        "complicationId" => new Complications.Id(Complications.COMPLICATION_TYPE_BATTERY)
+        :label => "Batt",
+        :angle => 270,
+        :radius => null,
+        :value => null,
+        :format => "%3d",
+        :days => null,
+        :pct => null,
+        :complicationId => new Complications.Id(Complications.COMPLICATION_TYPE_BATTERY)
       }
     ];
 
 public var sunData = [
       {
-        "label" => "Sunrise",
-        "value" => null,
-        "complicationId" => new Complications.Id(Complications.COMPLICATION_TYPE_SUNRISE),
-        "radius" => null,
-        "y_offset" => null,
-        "day_seconds" => null,
-        "touchzone" => 25
+        :label => "Sunrise",
+        :value => null,
+        :complicationId => new Complications.Id(Complications.COMPLICATION_TYPE_SUNRISE),
+        :radius => null,
+        :y_offset => null,
+        :day_seconds => null,
+        :touchzone => 25
       },
       {
-        "label" => "Sunset",
-        "value" => null,
-        "complicationId" => new Complications.Id(Complications.COMPLICATION_TYPE_SUNSET)
+        :label => "Sunset",
+        :value => null,
+        :complicationId => new Complications.Id(Complications.COMPLICATION_TYPE_SUNSET)
       }
 ];
 
 public var xyData = [
       {
-        "label" => "Alt",
-        "xy" => [50,20],
-        "center" => [-75,90],
-        "value" => null,
-        "units" => "ft",
-        "conversion" => m2ft,
-        "format" => "%d",
-        "complicationId" => new Complications.Id(Complications.COMPLICATION_TYPE_ALTITUDE)
+        :label => "Alt",
+        :xy => [50,20],
+        :center => [-75,90],
+        :value => null,
+        :units => "ft",
+        :conversion => m2ft,
+        :format => "%d",
+        :complicationId => new Complications.Id(Complications.COMPLICATION_TYPE_ALTITUDE)
       },
       {
-        "label" => "TS",
-        "xy" => [50,20],
-        "center" => [-75,125],
-        "value" => null,
-        "complicationId" => new Complications.Id(Complications.COMPLICATION_TYPE_TRAINING_STATUS)
+        :label => "TS",
+        :xy => [50,20],
+        :center => [-75,125],
+        :value => null,
+        :complicationId => new Complications.Id(Complications.COMPLICATION_TYPE_TRAINING_STATUS)
       },
       {
-        "label" => "RT",
-        "xy" => [50,20],
-        "center" => [85,90],
-        "value" => null,
-        "units" => "h",
-        "conversion" => min2hr,
-        "format" => "%d",
-        "complicationId" => new Complications.Id(Complications.COMPLICATION_TYPE_RECOVERY_TIME)
+        :label => "RT",
+        :xy => [50,20],
+        :center => [85,90],
+        :value => null,
+        :units => "h",
+        :conversion => min2hr,
+        :format => "%d",
+        :complicationId => new Complications.Id(Complications.COMPLICATION_TYPE_RECOVERY_TIME)
       }
 ];
 
@@ -194,13 +194,13 @@ public function checkRadialData(points) {
 
     var currentBounds = radialData[i];
     if (drawZones) {
-    	Sys.println("checking bounding box: " + currentBounds["label"]);
+    	Sys.println("checking bounding box: " + currentBounds[:label]);
     }
 
     // check if the current bounding box has been hit,
     // if so, return the corresponding complication
-    if (checkBoundsForComplication(points,currentBounds["angle"],currentBounds["radius"])) {
-        return currentBounds["complicationId"];
+    if (checkBoundsForComplication(points,currentBounds[:angle],currentBounds[:radius])) {
+        return currentBounds[:complicationId];
     }
 
   }
@@ -212,20 +212,20 @@ public function checkRadialData(points) {
   	Sys.println("Checking XY: "+x+", "+y);
   }
   for (var i=0; i<xyData.size(); i++){
-    if ((xyData[i]["center"][0]-x).abs() < xyData[i]["xy"][0] 
-        && (xyData[i]["center"][1]-y).abs() < xyData[i]["xy"][1]){
-      return xyData[i]["complicationId"];
+    if ((xyData[i][:center][0]-x).abs() < xyData[i][:xy][0] 
+        && (xyData[i][:center][1]-y).abs() < xyData[i][:xy][1]){
+      return xyData[i][:complicationId];
     }
   }
 
   for (var i=0; i<touchZones.size(); i++){
-    if (x > touchZones[i]["center"][0] 
-          && (x-touchZones[i]["center"][0]) < 2*touchZones[i]["xy"][0] 
-          && (touchZones[i]["center"][1]-y).abs() < touchZones[i]["xy"][1]){
+    if (x > touchZones[i][:center][0] 
+          && (x-touchZones[i][:center][0]) < 2*touchZones[i][:xy][0] 
+          && (touchZones[i][:center][1]-y).abs() < touchZones[i][:xy][1]){
       if (touchZones[i].hasKey("complicationId")){
-        return touchZones[i]["complicationId"];
+        return touchZones[i][:complicationId];
       } else {
-        weatherFlag += touchZones[i]["shift"];
+        weatherFlag += touchZones[i][:shift];
         if (weatherFlag > 2){
           weatherFlag = 0;
         } else if (weatherFlag < 0){
@@ -237,15 +237,15 @@ public function checkRadialData(points) {
   }
   
 
-  y = y+sunData[0]["y_offset"];
+  y = y+sunData[0][:y_offset];
   var click_radius = Math.sqrt(x*x + y*y);
 
-  if ((click_radius-sunData[0]["radius"]).abs() < sunData[0]["touchzone"]){
-    return sunData[0]["complicationId"];
+  if ((click_radius-sunData[0][:radius]).abs() < sunData[0][:touchzone]){
+    return sunData[0][:complicationId];
   }
 
   // Return a weather complication ID if battery and sun aren't hit
-  if (click_radius < sunData[0]["radius"]-sunData[0]["touchzone"]){
+  if (click_radius < sunData[0][:radius]-sunData[0][:touchzone]){
     return weatherId;
   }
 

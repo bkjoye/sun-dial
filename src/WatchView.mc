@@ -53,26 +53,26 @@ public class WatchView extends Ui.WatchFace {
     var sec = clockTime.sec;
     var font = Gfx.FONT_SYSTEM_NUMBER_HOT;
     dc.setColor(Gfx.COLOR_LT_GRAY, Gfx.COLOR_TRANSPARENT);
-    dc.drawText(center_x+clockPosition["clock"]["center"][0],
-                center_y-clockPosition["clock"]["center"][1],
+    dc.drawText(center_x+clockPosition[:clock][:center][0],
+                center_y-clockPosition[:clock][:center][1],
                 font,
                 Lang.format("$1$:$2$", [hour.format("%02d"), minute.format("%02d")]),
                 Gfx.TEXT_JUSTIFY_CENTER|Gfx.TEXT_JUSTIFY_VCENTER);
                 
     font = Gfx.getVectorFont({:face=>["RobotoRegular","Swiss721Regular"], :size=>34});
-    dc.drawText(center_x+clockPosition["seconds"]["center"][0], 
-                center_y-clockPosition["seconds"]["center"][1], 
+    dc.drawText(center_x+clockPosition[:seconds][:center][0], 
+                center_y-clockPosition[:seconds][:center][1], 
                 font, 
                 sec.format("%02d"), 
                 Gfx.TEXT_JUSTIFY_CENTER|Gfx.TEXT_JUSTIFY_VCENTER);
-    dc.drawText(center_x+clockPosition["date"]["center"][0], 
-                center_y-clockPosition["date"]["center"][1], 
+    dc.drawText(center_x+clockPosition[:date][:center][0], 
+                center_y-clockPosition[:date][:center][1], 
                 font, 
                 Lang.format("$1$, $2$ $3$", [clockTime.day_of_week, clockTime.month, clockTime.day]), 
                 Gfx.TEXT_JUSTIFY_LEFT|Gfx.TEXT_JUSTIFY_VCENTER);
 
     if (hour instanceof Lang.Number && minute instanceof Lang.Number) {
-      sunData[0]["day_seconds"] = hour*3600+minute*60+sec;
+      sunData[0][:day_seconds] = hour*3600+minute*60+sec;
     }
     // draw bounding boxes (debug)
     drawRadialData(dc);
@@ -147,18 +147,18 @@ public class WatchView extends Ui.WatchFace {
 
     for (var i=0; i < radialData.size(); i=i+1){
 
-      if (complication == radialData[i]["complicationId"]) {
+      if (complication == radialData[i][:complicationId]) {
         if (thisComplication.getType() == Complications.COMPLICATION_TYPE_BATTERY){
-          radialData[i]["days"] = Math.round(Sys.getSystemStats().batteryInDays);
-          radialData[i]["pct"] = thisComplication.value;
-          radialData[i]["value"] = Lang.format("$1$% - $2$D", [thisComplication.value.format("%2d"), radialData[i]["days"].format("%2d")]);
+          radialData[i][:days] = Math.round(Sys.getSystemStats().batteryInDays);
+          radialData[i][:pct] = thisComplication.value;
+          radialData[i][:value] = Lang.format("$1$% - $2$D", [thisComplication.value.format("%2d"), radialData[i][:days].format("%2d")]);
         } else {
-          radialData[i]["value"] = thisComplication.value;
+          radialData[i][:value] = thisComplication.value;
         }
         if (thisComplication.shortLabel != null){
-          radialData[i]["label"] = thisComplication.shortLabel;
+          radialData[i][:label] = thisComplication.shortLabel;
         } else {
-          radialData[i]["label"] = thisComplication.longLabel;
+          radialData[i][:label] = thisComplication.longLabel;
         }
       }
 
@@ -166,12 +166,12 @@ public class WatchView extends Ui.WatchFace {
 
     for (var i=0; i < sunData.size(); i=i+1){
 
-      if (complication == sunData[i]["complicationId"]) {
-        sunData[i]["value"] = thisComplication.value;
+      if (complication == sunData[i][:complicationId]) {
+        sunData[i][:value] = thisComplication.value;
         // if (thisComplication.shortLabel != null){
-        // sunData[i]["label"] = thisComplication.shortLabel;
+        // sunData[i][:label] = thisComplication.shortLabel;
         // } else {
-        //   sunData[i]["label"] = thisComplication.longLabel;
+        //   sunData[i][:label] = thisComplication.longLabel;
         // }
       }
 
@@ -179,28 +179,28 @@ public class WatchView extends Ui.WatchFace {
 
     for (var i=0; i < xyData.size(); i=i+1){
 
-      if (complication == xyData[i]["complicationId"]) {
+      if (complication == xyData[i][:complicationId]) {
         var val = thisComplication.value;
-        if (xyData[i].hasKey("conversion") && val != null){
-          val *= xyData[i]["conversion"];
+        if (xyData[i].hasKey(:conversion) && val != null){
+          val *= xyData[i][:conversion];
           if (val > 1000){
             val = val/1000.0;
-            if (xyData[i].hasKey("units") && xyData[i]["units"].find("k ") == null){
-              xyData[i]["units"] = "k "+xyData[i]["units"];
-              xyData[i]["format"] = "%.1f";
+            if (xyData[i].hasKey(:units) && xyData[i][:units].find("k ") == null){
+              xyData[i][:units] = "k "+xyData[i][:units];
+              xyData[i][:format] = "%.1f";
             }
-          } else if (xyData[i].hasKey("units") && xyData[i]["units"].find("k ") != null){
-            xyData[i]["units"] = xyData[i]["units"].substring(2,null);
-            xyData[i]["format"] = "%d";
+          } else if (xyData[i].hasKey(:units) && xyData[i][:units].find("k ") != null){
+            xyData[i][:units] = xyData[i][:units].substring(2,null);
+            xyData[i][:format] = "%d";
           }
-          xyData[i]["value"] = val;//*xyData[i]["conversion"];
+          xyData[i][:value] = val;//*xyData[i][:conversion];
         } else {
-          xyData[i]["value"] = val;
+          xyData[i][:value] = val;
         }
         if (thisComplication.shortLabel != null){
-        xyData[i]["label"] = thisComplication.shortLabel;
+        xyData[i][:label] = thisComplication.shortLabel;
         } //else {
-        //   xyData[i]["label"] = thisComplication.longLabel;
+        //   xyData[i][:label] = thisComplication.longLabel;
         // }
       }
 
@@ -214,21 +214,21 @@ public class WatchView extends Ui.WatchFace {
     dc.setPenWidth(1);
     for (var i=0; i < radialData.size(); i=i+1){
 
-      // var x = radialData[i]["bounds"][0];
-      // var y = radialData[i]["bounds"][1];
-      // var r = radialData[i]["bounds"][2];
+      // var x = radialData[i][:bounds][0];
+      // var y = radialData[i][:bounds][1];
+      // var r = radialData[i][:bounds][2];
 
       // // draw a circle
       // dc.setColor(Gfx.COLOR_PURPLE, Gfx.COLOR_PURPLE);
       // dc.drawCircle(x,y,r);
 
-      if (!radialData[i].hasKey("angle")){
+      if (!radialData[i].hasKey(:angle)){
         continue;
       }
 
       // draw the complication label and value
-      var value = radialData[i]["value"] ? radialData[i]["value"] : "-";
-      var label = radialData[i]["label"];
+      var value = radialData[i][:value] ? radialData[i][:value] : "-";
+      var label = radialData[i][:label];
       var font = Gfx.getVectorFont({:face=>["RobotoRegular","Swiss721Regular"], :size=>34});
 
       dc.setColor(Gfx.COLOR_LT_GRAY, Gfx.COLOR_TRANSPARENT);
@@ -241,16 +241,16 @@ public class WatchView extends Ui.WatchFace {
       }
       var tmpval = "--";
       if (value != null && value instanceof Lang.Float) {
-          tmpval = Lang.format("$1$k", [value.format(radialData[i]["format"])]);
+          tmpval = Lang.format("$1$k", [value.format(radialData[i][:format])]);
       } else if (value != null && value instanceof Lang.Number) {
-        if (radialData[i]["format"].equals("%.1f")){
-          tmpval = Lang.format("$1$k", [(value/1000.0).format(radialData[i]["format"])]);
+        if (radialData[i][:format].equals("%.1f")){
+          tmpval = Lang.format("$1$k", [(value/1000.0).format(radialData[i][:format])]);
         } else {        
-          tmpval = value.format(radialData[i]["format"]);
+          tmpval = value.format(radialData[i][:format]);
         }
       } else if (value != null && value instanceof Lang.String && !value.equals("-")) {
         tmpval = value;
-        if (radialData[i].hasKey("pct") && radialData[i]["pct"] != null){
+        if (radialData[i].hasKey(:pct) && radialData[i][:pct] != null){
           drawBattery(dc, radialData[i]);
           tmplabel = "";
         }
@@ -262,17 +262,17 @@ public class WatchView extends Ui.WatchFace {
         text = Lang.format("$1$", [tmpval]);
       }
       // } else {
-      //   if (Complications.getComplication(radialData[i]["complicationId"]).getType() == Complications.COMPLICATION_TYPE_INVALID){
+      //   if (Complications.getComplication(radialData[i][:complicationId]).getType() == Complications.COMPLICATION_TYPE_INVALID){
       //     System.println("Complication Invalid");
       //   } else {
       //     System.println("Idk...");
       //   }
       // }
       var justification = Gfx.TEXT_JUSTIFY_CENTER;
-      var angle = radialData[i]["angle"];
+      var angle = radialData[i][:angle];
       var radius = angle <= 180 ? dw/2-(dc.getFontHeight(font)) : dw/2-10;
-      if (radialData[i]["radius"] == null){
-        radialData[i]["radius"] = dw/2-(dc.getFontHeight(font))-radialTouchOffset;
+      if (radialData[i][:radius] == null){
+        radialData[i][:radius] = dw/2-(dc.getFontHeight(font))-radialTouchOffset;
       }
       var direction = angle <= 180 ? Gfx.RADIAL_TEXT_DIRECTION_CLOCKWISE : Gfx.RADIAL_TEXT_DIRECTION_COUNTER_CLOCKWISE;
 
@@ -284,12 +284,12 @@ public class WatchView extends Ui.WatchFace {
   function drawBattery(dc, data){
     var radius = dh/2;
     var degreeStart = 270-22.5;
-    var degreeEnd = degreeStart+(45*data["pct"]/100.0);
+    var degreeEnd = degreeStart+(45*data[:pct]/100.0);
     var direction = dc.ARC_COUNTER_CLOCKWISE;
     dc.setPenWidth(10);
-    if (data["pct"]>66){
+    if (data[:pct]>66){
       dc.setColor(Gfx.COLOR_GREEN, Gfx.COLOR_TRANSPARENT);
-    } else if (data["pct"]>33){
+    } else if (data[:pct]>33){
       dc.setColor(Gfx.COLOR_YELLOW, Gfx.COLOR_TRANSPARENT);
     } else {
       dc.setColor(Gfx.COLOR_RED, Gfx.COLOR_TRANSPARENT);
@@ -307,13 +307,13 @@ public class WatchView extends Ui.WatchFace {
     dc.setPenWidth(2);
     dc.drawArc(center_x, center_y+offset, radius, direction, degreeStart, degreeEnd);
 
-    if (sunData[1]["value"] != null 
-        && sunData[0]["value"] != null 
-        && sunData[0]["day_seconds"] != null) {
-      if (sunData[0]["day_seconds"] >= sunData[0]["value"] 
-          && sunData[0]["day_seconds"] < sunData[1]["value"]) {
-        var day_remain = (sunData[1]["value"]-sunData[0]["day_seconds"]);
-        var daylight_seconds = sunData[1]["value"]-sunData[0]["value"];
+    if (sunData[1][:value] != null 
+        && sunData[0][:value] != null 
+        && sunData[0][:day_seconds] != null) {
+      if (sunData[0][:day_seconds] >= sunData[0][:value] 
+          && sunData[0][:day_seconds] < sunData[1][:value]) {
+        var day_remain = (sunData[1][:value]-sunData[0][:day_seconds]);
+        var daylight_seconds = sunData[1][:value]-sunData[0][:value];
         var angle_range = (degreeStart-degreeEnd).abs();
         var angle_arc = day_remain*angle_range/daylight_seconds;
         // angle_arc = angle_arc > 0 ? angle_arc : 1;
@@ -328,27 +328,27 @@ public class WatchView extends Ui.WatchFace {
     }
     dc.setColor(Gfx.COLOR_LT_GRAY, Gfx.COLOR_TRANSPARENT);
 
-    // var value = radialData[i]["value"] ? radialData[i]["value"] : "-";
+    // var value = radialData[i][:value] ? radialData[i][:value] : "-";
     var rise_str = "-";
     var set_str = "-";
     var font = Gfx.getVectorFont({:face=>["RobotoRegular","Swiss721Regular"], :size=>34});
     direction = Gfx.RADIAL_TEXT_DIRECTION_CLOCKWISE;
-    if (sunData[0]["value"] != null){
-      var rise_hours = sunData[0]["value"]/3600;
+    if (sunData[0][:value] != null){
+      var rise_hours = sunData[0][:value]/3600;
       // var rise_whole_hours = Math.floor(rise_hours);
-      var rise_mins = sunData[0]["value"] % 3600/60;
+      var rise_mins = sunData[0][:value] % 3600/60;
       rise_str = ""+rise_hours.format("%02d")+":"+rise_mins.format("%02d");
     }
-    if (sunData[1]["value"] != null){
-      var set_hours = sunData[1]["value"]/3600;
+    if (sunData[1][:value] != null){
+      var set_hours = sunData[1][:value]/3600;
       // var set_whole_hours = Math.floor(set_hours);
-      var set_mins = sunData[1]["value"] % 3600/60;
+      var set_mins = sunData[1][:value] % 3600/60;
       set_str = ""+set_hours.format("%02d")+":"+set_mins.format("%02d");
     }
 
-    if (sunData[0]["radius"] == null){
-      sunData[0]["radius"] = radius;
-      sunData[0]["y_offset"] = offset;
+    if (sunData[0][:radius] == null){
+      sunData[0][:radius] = radius;
+      sunData[0][:y_offset] = offset;
     }
 
     dc.drawRadialText(center_x, center_y+offset, font, rise_str, 
@@ -360,21 +360,21 @@ public class WatchView extends Ui.WatchFace {
   function drawXYData(dc){
     for (var i=0; i<xyData.size(); i++){
       var tmplabel = "null";
-      if (xyData[i]["label"] != null) {
-        tmplabel = xyData[i]["label"];
+      if (xyData[i][:label] != null) {
+        tmplabel = xyData[i][:label];
       }
-      var x = center_x+xyData[i]["center"][0];
-      var y = center_y-xyData[i]["center"][1];
+      var x = center_x+xyData[i][:center][0];
+      var y = center_y-xyData[i][:center][1];
       var font = Gfx.getVectorFont({:face=>["RobotoRegular","Swiss721Regular"], :size=>34});
       var text = "";
-      if (xyData[i]["value"] != null){
-        if (xyData[i].hasKey("units") && xyData[i].hasKey("format")){
-          var val = xyData[i]["value"];
-          text = Lang.format("$1$: $2$$3$", [tmplabel, val.format(xyData[i]["format"]), xyData[i]["units"]]);
-        } else if (xyData[i].hasKey("units")) {
-          text = Lang.format("$1$: $2$$3$", [tmplabel, xyData[i]["value"], xyData[i]["units"]]);
-        } else if (xyData[i]["label"].equals("TS")){
-          var key = xyData[i]["value"].toUpper();
+      if (xyData[i][:value] != null){
+        if (xyData[i].hasKey(:units) && xyData[i].hasKey(:format)){
+          var val = xyData[i][:value];
+          text = Lang.format("$1$: $2$$3$", [tmplabel, val.format(xyData[i][:format]), xyData[i][:units]]);
+        } else if (xyData[i].hasKey(:units)) {
+          text = Lang.format("$1$: $2$$3$", [tmplabel, xyData[i][:value], xyData[i][:units]]);
+        } else if (xyData[i][:label].equals("TS")){
+          var key = xyData[i][:value].toUpper();
           if (isDayTime && ts_colors.hasKey(key)){
             dc.drawText(x, y, font, tmplabel+":", Gfx.TEXT_JUSTIFY_RIGHT|Gfx.TEXT_JUSTIFY_VCENTER);
             dc.setColor(ts_colors[key], Gfx.COLOR_TRANSPARENT);
@@ -382,11 +382,11 @@ public class WatchView extends Ui.WatchFace {
             dc.setColor(Gfx.COLOR_LT_GRAY, Gfx.COLOR_TRANSPARENT);
             continue;
           } else {
-            text = Lang.format("$1$: $2$", [tmplabel, xyData[i]["value"].substring(null,2)]);
+            text = Lang.format("$1$: $2$", [tmplabel, xyData[i][:value].substring(null,2)]);
           }
           
         } else {
-          text = Lang.format("$1$: $2$", [tmplabel, xyData[i]["value"]]);
+          text = Lang.format("$1$: $2$", [tmplabel, xyData[i][:value]]);
         }
       } else {
         text = tmplabel+": --";
@@ -528,25 +528,25 @@ public class WatchView extends Ui.WatchFace {
     dc.setPenWidth(2);
     dc.setColor(Gfx.COLOR_GREEN, Gfx.COLOR_TRANSPARENT);
     for (var i=0;i<radialData.size();i++) {
-      dc.drawArc(center_x, center_y, radialData[i]["radius"], Gfx.ARC_CLOCKWISE, radialData[i]["angle"]+21, radialData[i]["angle"]-21);
+      dc.drawArc(center_x, center_y, radialData[i][:radius], Gfx.ARC_CLOCKWISE, radialData[i][:angle]+21, radialData[i][:angle]-21);
     }
     dc.setColor(Gfx.COLOR_DK_BLUE, Gfx.COLOR_TRANSPARENT);
     for (var i=0;i<xyData.size();i++) {
-      dc.drawRectangle(center_x+xyData[i]["center"][0]-xyData[i]["xy"][0], 
-                        center_y-xyData[i]["center"][1]-xyData[i]["xy"][1],
-                        xyData[i]["xy"][0]*2,
-                        xyData[i]["xy"][1]*2);
+      dc.drawRectangle(center_x+xyData[i][:center][0]-xyData[i][:xy][0], 
+                        center_y-xyData[i][:center][1]-xyData[i][:xy][1],
+                        xyData[i][:xy][0]*2,
+                        xyData[i][:xy][1]*2);
     }
     dc.setColor(Gfx.COLOR_BLUE, Gfx.COLOR_TRANSPARENT);
     for (var i=0;i<touchZones.size();i++) {
-      dc.drawRectangle(center_x+touchZones[i]["center"][0], 
-                        center_y-touchZones[i]["center"][1]-touchZones[i]["xy"][1],
-                        touchZones[i]["xy"][0]*2,
-                        touchZones[i]["xy"][1]*2);
+      dc.drawRectangle(center_x+touchZones[i][:center][0], 
+                        center_y-touchZones[i][:center][1]-touchZones[i][:xy][1],
+                        touchZones[i][:xy][0]*2,
+                        touchZones[i][:xy][1]*2);
     }
     dc.setColor(Gfx.COLOR_RED, Gfx.COLOR_TRANSPARENT);
-    dc.drawArc(center_x, center_y+sunData[0]["y_offset"], sunData[0]["radius"]+sunData[0]["touchzone"], Gfx.ARC_COUNTER_CLOCKWISE, 58, 122);
-    dc.drawArc(center_x, center_y+sunData[0]["y_offset"], sunData[0]["radius"]-sunData[0]["touchzone"], Gfx.ARC_COUNTER_CLOCKWISE, 58, 122);
+    dc.drawArc(center_x, center_y+sunData[0][:y_offset], sunData[0][:radius]+sunData[0][:touchzone], Gfx.ARC_COUNTER_CLOCKWISE, 58, 122);
+    dc.drawArc(center_x, center_y+sunData[0][:y_offset], sunData[0][:radius]-sunData[0][:touchzone], Gfx.ARC_COUNTER_CLOCKWISE, 58, 122);
   }
 
   function weatherIcons(){

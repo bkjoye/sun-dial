@@ -35,18 +35,18 @@ public class WatchApp extends App.AppBase {
       // Complications.subscribeToUpdates(new Complications.Id(Complications.COMPLICATION_TYPE_STEPS));
       // Complications.subscribeToUpdates(new Complications.Id(Complications.COMPLICATION_TYPE_STRESS));
       // Complications.subscribeToUpdates(new Complications.Id(Complications.COMPLICATION_TYPE_BODY_BATTERY));
-      // radialData[0]["complicationId"] = new Complications.Id(Complications.COMPLICATION_TYPE_HEART_RATE);
-      // radialData[1]["complicationId"] =new Complications.Id(Complications.COMPLICATION_TYPE_STEPS);
-      // radialData[2]["complicationId"] =new Complications.Id(Complications.COMPLICATION_TYPE_STRESS);
-      // radialData[3]["complicationId"] =new Complications.Id(Complications.COMPLICATION_TYPE_BODY_BATTERY);
+      // radialData[0][:complicationId] = new Complications.Id(Complications.COMPLICATION_TYPE_HEART_RATE);
+      // radialData[1][:complicationId] =new Complications.Id(Complications.COMPLICATION_TYPE_STEPS);
+      // radialData[2][:complicationId] =new Complications.Id(Complications.COMPLICATION_TYPE_STRESS);
+      // radialData[3][:complicationId] =new Complications.Id(Complications.COMPLICATION_TYPE_BODY_BATTERY);
       for (var i=0; i < radialData.size(); i=i+1){
-        Complications.subscribeToUpdates(radialData[i]["complicationId"]);
+        Complications.subscribeToUpdates(radialData[i][:complicationId]);
       }
       for (var i=0; i < xyData.size(); i=i+1){
-        Complications.subscribeToUpdates(xyData[i]["complicationId"]);
+        Complications.subscribeToUpdates(xyData[i][:complicationId]);
       }
       for (var i=0; i < sunData.size(); i=i+1){
-        Complications.subscribeToUpdates(sunData[i]["complicationId"]);
+        Complications.subscribeToUpdates(sunData[i][:complicationId]);
       }
     }
 
