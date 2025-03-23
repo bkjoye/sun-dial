@@ -18,7 +18,7 @@ using Toybox.Weather as Weather;
 
 public class WatchView extends Ui.WatchFace {
 
-  var iconMap = null;//weatherIcons();
+  var iconMap = weatherIcons();
 
   function initialize() {
    Ui.WatchFace.initialize();
@@ -105,7 +105,7 @@ public class WatchView extends Ui.WatchFace {
   }
 
   function getWeather(){
-    iconMap = weatherIcons();
+    // iconMap = weatherIcons();
     // Sys.println("Getting Weather");
     // if (weatherFlag == 0){
       weatherCurrent = Weather.getCurrentConditions();
@@ -326,6 +326,7 @@ public class WatchView extends Ui.WatchFace {
         isDayTime = false;
       }
     }
+    iconMap = weatherIcons();
     dc.setColor(Gfx.COLOR_LT_GRAY, Gfx.COLOR_TRANSPARENT);
 
     // var value = radialData[i][:value] ? radialData[i][:value] : "-";
