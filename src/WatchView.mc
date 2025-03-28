@@ -126,10 +126,13 @@ public class WatchView extends Ui.WatchFace {
       forecast_data[3].add(Gregorian.info(weatherHourly[i].forecastTime, Time.FORMAT_SHORT).hour);
     }
 
-    var sortTemps = forecast_data[0];
-    sortTemps.sort(null);
-    maxTemp = sortTemps[sortTemps.size()-1];
-    minTemp = sortTemps[0];
+    // var sortTemps = forecast_data[0];
+    // sortTemps.sort(null);
+    // maxTemp = sortTemps[sortTemps.size()-1];
+    // minTemp = sortTemps[0];
+    var minMaxTemps = minMax(forecast_data[0]);
+    minTemp = minMaxTemps[0];
+    maxTemp = minMaxTemps[1];
     var tempRange = maxTemp == minTemp ? 1 : maxTemp-minTemp;
 
     for (var i=0; i<forecast_data[0].size(); i++) {
@@ -137,6 +140,22 @@ public class WatchView extends Ui.WatchFace {
       forecast_data[1][i] = forecast_data[1][i]/100.0;
       forecast_data[2][i] = forecast_data[2][i]/100.0;
     }
+  }
+
+  function minMax(data){
+    var min = data[0];
+    var max = data[0];
+
+    for (var i=0; i<data.size(); i++){
+      if (data[i]>max){
+        max = data[i];
+      }
+      if (data[i]<min){
+        min = data[i];
+      }
+    }
+
+    return [min, max];
   }
 
 

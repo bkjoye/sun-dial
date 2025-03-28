@@ -222,9 +222,9 @@ public function checkRadialData(points) {
     if (x > touchZones[i][:center][0] 
           && (x-touchZones[i][:center][0]) < 2*touchZones[i][:xy][0] 
           && (touchZones[i][:center][1]-y).abs() < touchZones[i][:xy][1]){
-      if (touchZones[i].hasKey("complicationId")){
+      if (touchZones[i].hasKey(:complicationId)){
         return touchZones[i][:complicationId];
-      } else {
+      } else if (touchZones[i].hasKey(:shift)) {
         weatherFlag += touchZones[i][:shift];
         if (weatherFlag > 2){
           weatherFlag = 0;
