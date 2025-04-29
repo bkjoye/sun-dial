@@ -14,6 +14,13 @@ public var dh = 0;
 public var center_x = 0;
 public var center_y = 0;
 
+// fonts
+public var weatherFont;
+public var vectorFont;
+public var vectorFontSmall;
+public var clockFont;
+
+
 public var drawZones = false;
 
 //unit conversion
@@ -22,6 +29,11 @@ public const min2hr = 1/60.0;
 public const deg2rad = Math.PI/180.0;
 public const mps2miph = 0.000621371*3600;
 public const pa2mmhg = 0.00750062;
+
+//UI scaling
+public const SF = 1.0/227.0;
+public var xSF = 1.0;
+public var ySF = 1.0;
 
 public var isDayTime = true;
 
@@ -38,33 +50,33 @@ public const ts_colors = {
 
 public var clockPosition = {
   :clock => {
-    :center => [0, 20]
+    :center => [0*SF, 20*SF]
   },
   :date => {
-    :center => [-150, -50]
+    :center => [-150*SF, -50*SF]
   },
   :seconds => {
-    :center => [120, -50]
+    :center => [120*SF, -50*SF]
   }
 };
 
 public var touchZones = [
   {
     :label => "WeatherScrollRight",
-    :xy => [70, 50],
-    :center => [20, 20],
+    :xy => [70*SF, 50*SF],
+    :center => [20*SF, 20*SF],
     :shift => 1
   },
   {
     :label => "WeatherScrollLeft",
-    :xy => [70, 50],
-    :center => [-160, 20],
+    :xy => [70*SF, 50*SF],
+    :center => [-160*SF, 20*SF],
     :shift => -1
   },
   {
     :label => "Date",
-    :xy => [80, 20],
-    :center => clockPosition[:date][:center],
+    :xy => [80*SF, 20*SF],
+    :center => [-150*SF, -50*SF],//clockPosition[:date][:center],
     :complicationId => new Complications.Id(Complications.COMPLICATION_TYPE_WEEKDAY_MONTHDAY)
   }
 ];
@@ -143,8 +155,8 @@ public var sunData = [
 public var xyData = [
       {
         :label => "Alt",
-        :xy => [50,20],
-        :center => [-75,90],
+        :xy => [50*SF, 20*SF],
+        :center => [-75*SF, 90*SF],
         :value => null,
         :units => "ft",
         :conversion => m2ft,
@@ -153,15 +165,15 @@ public var xyData = [
       },
       {
         :label => "TS",
-        :xy => [50,20],
-        :center => [-75,125],
+        :xy => [50*SF, 20*SF],
+        :center => [-75*SF, 125*SF],
         :value => null,
         :complicationId => new Complications.Id(Complications.COMPLICATION_TYPE_TRAINING_STATUS)
       },
       {
         :label => "RT",
-        :xy => [50,20],
-        :center => [85,90],
+        :xy => [50*SF, 20*SF],
+        :center => [85*SF, 90*SF],
         :value => null,
         :units => "h",
         :conversion => min2hr,
@@ -171,7 +183,6 @@ public var xyData = [
 ];
 
 var weatherId = new Complications.Id(Complications.COMPLICATION_TYPE_CURRENT_WEATHER);
-public var weatherFont;
 public var tempUnits = "°F";
 public var pressConversion = 1;
 public var weatherTimer = new Timer.Timer();
