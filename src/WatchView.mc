@@ -18,11 +18,80 @@ using Toybox.Weather as Weather;
 
 public class WatchView extends Ui.WatchFace {
 
+  var xSFs = new [167];
+  // fonts
+  var weatherFont;
+  var vectorFont;
+  var vectorFontSmall;
+  var clockFont;
+
+  //UI scaling
+  var xSF = 1.0;
+  var ySF = 1.0;
+
+  var isDayTime = true;
+
+  const ts_colors = {
+        "PEAKING" => Gfx.COLOR_PURPLE,
+        "PRODUCTIVE" => Gfx.COLOR_GREEN,
+        "MAINTAINING" => Gfx.COLOR_YELLOW,
+        "RECOVERY" => Gfx.COLOR_BLUE,
+        "STRAINED" => Gfx.COLOR_PINK,
+        "UNPRODUCTIVE" => Gfx.COLOR_ORANGE,
+        "DETRAINING" => Gfx.COLOR_DK_GRAY,
+        "OVERREACHING" => Gfx.COLOR_RED
+  };
+
   var iconMap = weatherIcons();
+  var icons = {:notification => {:x => null, :y => null, :icon => null}, 
+                :alarm => {:x => null, :y => null, :icon => null}, 
+                :sync => {:x => null, :y => null, :icon => null}};
 
   function initialize() {
-   Ui.WatchFace.initialize();
-   getWeather();
+    Ui.WatchFace.initialize();
+
+    getWeather();
+    weatherFont = Ui.loadResource(Rez.Fonts.WeatherIcon);
+    clockFont = Gfx.FONT_SYSTEM_NUMBER_HOT;
+
+    icons[:notification][:icon] = loadResource(Rez.Drawables.Notification);
+    icons[:notification][:x] = icons[:notification][:icon].getWidth()/2;
+    icons[:notification][:y] = icons[:notification][:icon].getHeight()/2;
+    icons[:alarm][:icon] = loadResource(Rez.Drawables.Alarm);
+    icons[:alarm][:x] = icons[:alarm][:icon].getWidth()/2;
+    icons[:alarm][:y] = icons[:alarm][:icon].getHeight()/2;
+    icons[:sync][:icon] = loadResource(Rez.Drawables.Sync);
+    icons[:sync][:x] = icons[:sync][:icon].getWidth()/2;
+    icons[:sync][:y] = icons[:sync][:icon].getHeight()/2;
+
+    radialData[0][:icon] = loadResource(Rez.Drawables.Hr);
+    radialData[0][:icon_xy] = [radialData[0][:icon].getWidth()/2, radialData[0][:icon].getHeight()/2];
+    radialData[0][:rotation] = new Gfx.AffineTransform();
+    radialData[0][:rotation].rotate(88-radialData[0][:angle]);
+    radialData[1][:icon] = loadResource(Rez.Drawables.Stress);
+    radialData[1][:icon_xy] = [radialData[1][:icon].getWidth()/2, radialData[1][:icon].getHeight()/2];
+    radialData[1][:rotation] = new Gfx.AffineTransform();
+    radialData[1][:rotation].rotate(88-radialData[1][:angle]);
+    radialData[2][:icon] = loadResource(Rez.Drawables.Steps);
+    radialData[2][:icon_xy] = [radialData[2][:icon].getWidth()/2, radialData[2][:icon].getHeight()/2];
+    radialData[2][:rotation] = new Gfx.AffineTransform();
+    radialData[2][:rotation].rotate(88-radialData[2][:angle]);
+    radialData[3][:icon] = loadResource(Rez.Drawables.Bb);
+    radialData[3][:icon_xy] = [radialData[3][:icon].getWidth()/2, radialData[3][:icon].getHeight()/2];
+    radialData[3][:rotation] = new Gfx.AffineTransform();
+    radialData[3][:rotation].rotate(88-radialData[3][:angle]);
+    radialData[4][:icon] = loadResource(Rez.Drawables.Floors);
+    radialData[4][:icon_xy] = [radialData[4][:icon].getWidth()/2, radialData[4][:icon].getHeight()/2];
+    radialData[4][:rotation] = new Gfx.AffineTransform();
+    radialData[4][:rotation].rotate(88-radialData[4][:angle]);
+    
+    xyData[0][:icon] = loadResource(Rez.Drawables.Alt);
+    xyData[0][:icon_xy] = [xyData[0][:icon].getWidth()/2, xyData[0][:icon].getHeight()/2];
+    xyData[1][:icon] = loadResource(Rez.Drawables.Ts);
+    xyData[1][:icon_xy] = [xyData[1][:icon].getWidth()/2, xyData[1][:icon].getHeight()/2];
+    xyData[2][:icon] = loadResource(Rez.Drawables.Rt);
+    xyData[2][:icon_xy] = [xyData[2][:icon].getWidth()/2, xyData[2][:icon].getHeight()/2];
+
   }
 
   function onLayout(dc) {
@@ -39,10 +108,15 @@ public class WatchView extends Ui.WatchFace {
     xSF = center_x*SF;
     ySF = center_y*SF;
 
-    weatherFont = Ui.loadResource(Rez.Fonts.WeatherIcon);
+    for (var i=0; i<xSFs.size(); i++){
+      xSFs[i] = i*xSF;
+    }
+
+
     vectorFont = Gfx.getVectorFont({:face=>["RobotoRegular","Swiss721Regular"], :size=>.15*center_x});
     vectorFontSmall = Gfx.getVectorFont({:face=>["RobotoRegular","Swiss721Regular"], :size=>.1*center_x});
-    clockFont = Gfx.FONT_SYSTEM_NUMBER_HOT;
+
+    radialTouchOffset *= center_x;
 
     for (var i=0; i < xyData.size(); i=i+1){
       xyData[i][:center][0] *= center_x;
@@ -103,6 +177,7 @@ public class WatchView extends Ui.WatchFace {
     drawSunInfo(dc);
     drawXYData(dc);
     drawWeather(dc);
+    drawStatusBar(dc);
     if (drawZones){
       drawTouchZones(dc);
     }
@@ -245,6 +320,32 @@ public class WatchView extends Ui.WatchFace {
 
   }
 
+  function drawStatusBar(dc){
+    var sysInfo = Sys.getDeviceSettings();
+    var offset = 0.0;
+    if (sysInfo.notificationCount > 0){
+      dc.drawBitmap(center_x+touchZones[3][:center][0]+icons[:notification][:x],
+                    center_y-touchZones[3][:center][1]-icons[:notification][:y], 
+                    icons[:notification][:icon]);
+      // dc.drawText(center_x+touchZones[3][:center][0]+icons[:notification][:x]*2,
+      //             center_y-touchZones[3][:center][1]-icons[:notification][:y]+.05*center_y,
+      //             vectorFontSmall, sysInfo.notificationCount, Gfx.TEXT_JUSTIFY_LEFT);
+      offset += icons[:notification][:x]*2 + xSFs[3];
+    }
+    if (sysInfo.alarmCount > 0){
+      dc.drawBitmap(center_x+touchZones[3][:center][0]+icons[:alarm][:x]+offset,
+                    center_y-touchZones[3][:center][1]-icons[:alarm][:y], 
+                    icons[:alarm][:icon]);
+      offset += icons[:alarm][:x]*2 + xSFs[3];
+    }
+    // if (sysInfo.phoneConnected){
+    //   dc.drawBitmap(center_x+touchZones[3][:center][0]+icons[:sync][:x]+offset,
+    //                 center_y-touchZones[3][:center][1]-icons[:sync][:y], 
+    //                 icons[:sync][:icon]);
+    //   offset += icons[:sync][:x]*2 + xSFs[3];
+    // }
+  }
+
   // debug by drawing bounding boxes and labels
   function drawRadialData(dc) {
 
@@ -262,7 +363,9 @@ public class WatchView extends Ui.WatchFace {
       dc.setColor(Gfx.COLOR_LT_GRAY, Gfx.COLOR_TRANSPARENT);
 
       var tmplabel = "null";
-      if (label != null) {
+      if (useIcons){
+        tmplabel = "";
+      } else if (label != null) {
         tmplabel = label.toString();
       }
       var tmpval = "--";
@@ -278,33 +381,40 @@ public class WatchView extends Ui.WatchFace {
         tmpval = value;
         if (radialData[i].hasKey(:pct) && radialData[i][:pct] != null){
           drawBattery(dc, radialData[i]);
-          tmplabel = "";
+          tmplabel = "batt";
         }
       }
       var text = "";
-      if (!tmplabel.equals("")){
+      if (!tmplabel.equals("batt")){
         text = Lang.format("$1$: $2$", [tmplabel, tmpval]);//tmplabel+": "+tmpval;
       } else {
         text = Lang.format("$1$", [tmpval]);
       }
 
-      var justification = Gfx.TEXT_JUSTIFY_CENTER;
       var angle = radialData[i][:angle];
-      var radius = angle <= 180 ? dw/2-(dc.getFontHeight(vectorFont)) : dw/2-10;
+      var radius = angle <= 180 ? center_x-(dc.getFontHeight(vectorFont)) : center_x-10;
       if (radialData[i][:radius] == null){
-        radialData[i][:radius] = dw/2-(dc.getFontHeight(vectorFont))-radialTouchOffset;
+        radialData[i][:radius] = center_x-(dc.getFontHeight(vectorFont))-radialTouchOffset;
       }
       var direction = angle <= 180 ? Gfx.RADIAL_TEXT_DIRECTION_CLOCKWISE : Gfx.RADIAL_TEXT_DIRECTION_COUNTER_CLOCKWISE;
 
-      dc.drawRadialText(center_x, center_y, vectorFont, text, justification, angle, radius, direction);
+      var justification = Gfx.TEXT_JUSTIFY_CENTER;
+      if (useIcons && !tmplabel.equals("batt")){
+        justification = Gfx.TEXT_JUSTIFY_LEFT;
+        dc.drawRadialText(center_x, center_y, vectorFont, text, justification, angle, radius, direction);
+        // dc.drawBitmap2(center_x+radius*Math.cos(radialData[i][:angle]*deg2rad), center_y-radius*Math.sin(radialData[i][:angle]*deg2rad), radialData[i][:icon], {:transform => radialData[i][:rotation]});
+        dc.drawBitmap(center_x+radius*Math.cos(radialData[i][:angle]*deg2rad), center_y-radius*Math.sin(radialData[i][:angle]*deg2rad), radialData[i][:icon]);
+      } else {
+        dc.drawRadialText(center_x, center_y, vectorFont, text, justification, angle, radius, direction);
+      }
     }
 
   }
 
   function drawBattery(dc, data){
-    var radius = dh/2;
-    var degreeStart = 270-22.5;
-    var degreeEnd = degreeStart+(45*data[:pct]/100.0);
+    var radius = center_y;
+    var degreeStart = 247.5;//270-22.5;
+    var degreeEnd = degreeStart+(0.45*data[:pct]);///100.0);
     var direction = dc.ARC_COUNTER_CLOCKWISE;
     dc.setPenWidth(10);
     if (data[:pct]>66){
@@ -320,8 +430,8 @@ public class WatchView extends Ui.WatchFace {
 
   function drawSunInfo(dc){
     var radius = dh*.75;
-    var degreeStart = 120+3;
-    var degreeEnd = 60-3;
+    var degreeStart = 123;//120+3;
+    var degreeEnd = 57;//60-3;
     var direction = dc.ARC_CLOCKWISE;
     var offset = dh*.9;
     dc.setPenWidth(2);
@@ -377,8 +487,10 @@ public class WatchView extends Ui.WatchFace {
   function drawXYData(dc){
     for (var i=0; i<xyData.size(); i++){
       var tmplabel = "null";
-      if (xyData[i][:label] != null) {
+      if ((xyData[i][:label] != null) && !useIcons) {
         tmplabel = xyData[i][:label];
+      } else {
+        tmplabel = "";
       }
       var x = center_x+xyData[i][:center][0];
       var y = center_y-xyData[i][:center][1];
@@ -394,8 +506,13 @@ public class WatchView extends Ui.WatchFace {
           if (isDayTime && ts_colors.hasKey(key)){
             dc.drawText(x, y, vectorFont, tmplabel+":", Gfx.TEXT_JUSTIFY_RIGHT|Gfx.TEXT_JUSTIFY_VCENTER);
             dc.setColor(ts_colors[key], Gfx.COLOR_TRANSPARENT);
-            dc.fillRoundedRectangle(x+4, y-10, 20, 20, 4); //TODO
+            dc.fillRoundedRectangle(x+xSFs[4], y-xSFs[10], xSFs[20], xSFs[20], xSFs[4]);
             dc.setColor(Gfx.COLOR_LT_GRAY, Gfx.COLOR_TRANSPARENT);
+            if (useIcons){
+              dc.drawBitmap(center_x+xyData[i][:center][0]-xyData[i][:icon_xy][0]*3,
+                          center_y-xyData[i][:center][1]-xyData[i][:icon_xy][1], 
+                          xyData[i][:icon]);
+            }
             continue;
           } else {
             text = Lang.format("$1$: $2$", [tmplabel, xyData[i][:value].substring(null,2)]);
@@ -407,14 +524,23 @@ public class WatchView extends Ui.WatchFace {
       } else {
         text = tmplabel+": --";
       }
-      dc.drawText(x, y, vectorFont, text, Gfx.TEXT_JUSTIFY_CENTER|Gfx.TEXT_JUSTIFY_VCENTER);
+      var offset = 0.0;
+      var alignment = Gfx.TEXT_JUSTIFY_CENTER|Gfx.TEXT_JUSTIFY_VCENTER;
+      if (useIcons){
+        dc.drawBitmap(center_x+xyData[i][:center][0]-xyData[i][:icon_xy][0]*2,
+                    center_y-xyData[i][:center][1]-xyData[i][:icon_xy][1], 
+                    xyData[i][:icon]);
+        // offset = xyData[i][:icon_xy][0]*2;
+        alignment = Gfx.TEXT_JUSTIFY_LEFT|Gfx.TEXT_JUSTIFY_VCENTER;
+      }
+      dc.drawText(x+offset, y, vectorFont, text, alignment);
     }
   }
 
   function drawWeather(dc){
     if (weatherFlag == 0 && weatherCurrent != null){
       // Draw current temp and feels like
-      dc.drawText(center_x, center_y+85*ySF, vectorFont, 
+      dc.drawText(center_x, center_y+xSFs[85], vectorFont, 
                   Lang.format("$1$$2$($3$)", 
                               [
                                 convertTemp(weatherCurrent.temperature).format("%d"), 
@@ -423,10 +549,10 @@ public class WatchView extends Ui.WatchFace {
                               ]), 
                   Gfx.TEXT_JUSTIFY_CENTER);
       // Draw current conditions icon
-      dc.drawText(center_x, center_y+120*ySF, weatherFont, iconMap[weatherCurrent.condition], Gfx.TEXT_JUSTIFY_CENTER);
+      dc.drawText(center_x, center_y+xSFs[120], weatherFont, iconMap[weatherCurrent.condition], Gfx.TEXT_JUSTIFY_CENTER);
       
       // Left and right info columns
-      var wPos = [145*xSF, 112*ySF, 130*ySF, 148*ySF];
+      var wPos = [xSFs[145], xSFs[112], xSFs[130], xSFs[148]];
       var wTime = Gregorian.info(weatherCurrent.observationTime, Time.FORMAT_SHORT);
       var wLText = [
                     Lang.format("H:$1$", [convertTemp(weatherCurrent.highTemperature).format("%d")]), 
@@ -449,25 +575,25 @@ public class WatchView extends Ui.WatchFace {
 
       //Wind info
       if (weatherCurrent.windBearing != null){
-        drawArrow(dc, [center_x+65*xSF, center_y+132*ySF], weatherCurrent.windBearing);
-        dc.drawText(center_x+65*xSF, center_y+148*ySF, vectorFontSmall, 
+        drawArrow(dc, [center_x+xSFs[65], center_y+xSFs[132]], weatherCurrent.windBearing);
+        dc.drawText(center_x+xSFs[65], center_y+xSFs[148], vectorFontSmall, 
                     Math.round(weatherCurrent.windSpeed*mps2miph).format("%d"), 
                     Gfx.TEXT_JUSTIFY_CENTER);
       }
 
     } else if (weatherFlag == 1 && weatherHourly != null){
-      var x0 = 105*xSF;
-      var y0 = center_y + 165*ySF;
-      var width = 2*(center_x-105*xSF);
-      var height = 50*ySF;
+      var x0 = xSFs[105];
+      var y0 = center_y + xSFs[165];
+      var width = 2*(center_x-xSFs[105]);
+      var height = xSFs[50];
       drawForecastPlot(dc, x0, y0, width, height, forecast_data); 
     } else if (weatherFlag == 2 && weatherDaily != null){
       var numDays = weatherDaily.size()-1;
       var spacing = 60;//*xSF;
       var offset = (numDays-1)*spacing/2.0;
-      var voffset1 = 95*ySF;
-      var voffset2 = 150*ySF;
-      var voffset3 = 167*ySF;
+      var voffset1 = xSFs[95];
+      var voffset2 = xSFs[150];
+      var voffset3 = xSFs[167];
       for (var i=1; i<numDays+1; i++){
         var position = (i-1)*spacing;
         var dow = Gregorian.info(weatherDaily[i].forecastTime, Time.FORMAT_MEDIUM).day_of_week;
@@ -485,7 +611,7 @@ public class WatchView extends Ui.WatchFace {
   }
 
   function drawArrow(dc, center, rotation){
-    var pts = [[0,0], [5, -5], [0,15], [-5, -5]]; //TODO
+    var pts = [[0,0], [xSFs[5], -xSFs[5]], [0,xSFs[15]], [-xSFs[5], -xSFs[5]]];
     rotation *= -deg2rad;
     var cos = Math.cos(rotation);
     var sin = Math.sin(rotation);

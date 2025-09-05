@@ -1,11 +1,66 @@
 <resources>
 
     <strings>
-      <string id="AppName">Complications</string>
+      <string id="AppName">SunDial</string>
     </strings>
 
     <drawables>
       <bitmap id="LauncherIcon" filename="launcher_icon.png" />
+      <bitmap id="Alarm" filename="svgs/alarm-clock.svg" dithering="floyd_steinberg" scaleX="5%" scaleRelativeTo="screen">
+        <palette disableTransparency="false">
+          <color>AAAAAA</color>
+        </palette>
+      </bitmap>
+      <bitmap id="Alt" filename="svgs/altimeter.svg" dithering="floyd_steinberg" scaleX="5%" scaleRelativeTo="screen">
+        <palette disableTransparency="false">
+          <color>AAAAAA</color>
+        </palette>
+      </bitmap>
+      <bitmap id="Bb" filename="svgs/body-battery.svg" dithering="floyd_steinberg" scaleX="5%" scaleRelativeTo="screen">
+        <palette disableTransparency="false">
+          <color>AAAAAA</color>
+        </palette>
+      </bitmap>
+      <bitmap id="Floors" filename="svgs/floors-climbed.svg" dithering="floyd_steinberg" scaleX="5%" scaleRelativeTo="screen">
+        <palette disableTransparency="false">
+          <color>AAAAAA</color>
+        </palette>
+      </bitmap>
+      <bitmap id="Hr" filename="svgs/heart-rate.svg" dithering="floyd_steinberg" scaleX="5%" scaleRelativeTo="screen">
+        <palette disableTransparency="false">
+          <color>AAAAAA</color>
+        </palette>
+      </bitmap>
+      <bitmap id="Notification" filename="svgs/message-outline.svg" dithering="floyd_steinberg" scaleX="5%" scaleRelativeTo="screen">
+        <palette disableTransparency="false">
+          <color>AAAAAA</color>
+        </palette>
+      </bitmap>
+      <bitmap id="Rt" filename="svgs/recovery-time.svg" dithering="floyd_steinberg" scaleX="5%" scaleRelativeTo="screen">
+        <palette disableTransparency="false">
+          <color>AAAAAA</color>
+        </palette>
+      </bitmap>
+      <bitmap id="Steps" filename="svgs/steps.svg" dithering="floyd_steinberg" scaleX="5%" scaleRelativeTo="screen">
+        <palette disableTransparency="false">
+          <color>AAAAAA</color>
+        </palette>
+      </bitmap>
+      <bitmap id="Stress" filename="svgs/stress.svg" dithering="floyd_steinberg" scaleX="5%" scaleRelativeTo="screen">
+        <palette disableTransparency="false">
+          <color>AAAAAA</color>
+        </palette>
+      </bitmap>
+      <bitmap id="Sync" filename="svgs/sync.svg" dithering="floyd_steinberg" scaleX="5%" scaleRelativeTo="screen">
+        <palette disableTransparency="false">
+          <color>AAAAAA</color>
+        </palette>
+      </bitmap>
+      <bitmap id="Ts" filename="svgs/training-status.svg" dithering="floyd_steinberg" scaleX="5%" scaleRelativeTo="screen">
+        <palette disableTransparency="false">
+          <color>AAAAAA</color>
+        </palette>
+      </bitmap>
     </drawables>
 
     <font id="WeatherIcon" filename="weather.fnt" antialias="true" />

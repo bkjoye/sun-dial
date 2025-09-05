@@ -14,11 +14,7 @@ public var dh = 0;
 public var center_x = 0;
 public var center_y = 0;
 
-// fonts
-public var weatherFont;
-public var vectorFont;
-public var vectorFontSmall;
-public var clockFont;
+public var useIcons = false;
 
 
 public var drawZones = false;
@@ -31,61 +27,55 @@ public const mps2miph = 0.000621371*3600;
 public const pa2mmhg = 0.00750062;
 
 //UI scaling
-public const SF = 1.0/227.0;
-public var xSF = 1.0;
-public var ySF = 1.0;
-
-public var isDayTime = true;
-
-public const ts_colors = {
-  "PEAKING" => Gfx.COLOR_PURPLE,
-  "PRODUCTIVE" => Gfx.COLOR_GREEN,
-  "MAINTAINING" => Gfx.COLOR_YELLOW,
-  "RECOVERY" => Gfx.COLOR_BLUE,
-  "STRAINED" => Gfx.COLOR_PINK,
-  "UNPRODUCTIVE" => Gfx.COLOR_ORANGE,
-  "DETRAINING" => Gfx.COLOR_DK_GRAY,
-  "OVERREACHING" => Gfx.COLOR_RED
-};
-
+const SF = 1.0/227.0;
+  
 public var clockPosition = {
-  :clock => {
-    :center => [0*SF, 20*SF]
-  },
-  :date => {
-    :center => [-150*SF, -50*SF]
-  },
-  :seconds => {
-    :center => [120*SF, -50*SF]
-  }
+      :clock => {
+        :center => [0*SF, 20*SF]
+      },
+      :date => {
+        :center => [-150*SF, -50*SF]
+      },
+      :seconds => {
+        :center => [120*SF, -50*SF]
+      }
 };
 
 public var touchZones = [
-  {
-    :label => "WeatherScrollRight",
-    :xy => [70*SF, 50*SF],
-    :center => [20*SF, 20*SF],
-    :shift => 1
-  },
-  {
-    :label => "WeatherScrollLeft",
-    :xy => [70*SF, 50*SF],
-    :center => [-160*SF, 20*SF],
-    :shift => -1
-  },
-  {
-    :label => "Date",
-    :xy => [80*SF, 20*SF],
-    :center => [-150*SF, -50*SF],//clockPosition[:date][:center],
-    :complicationId => new Complications.Id(Complications.COMPLICATION_TYPE_WEEKDAY_MONTHDAY)
-  }
+      {
+        :label => "WeatherScrollRight",
+        :xy => [70*SF, 50*SF],
+        :center => [20*SF, 20*SF],
+        :shift => 1
+      },
+      {
+        :label => "WeatherScrollLeft",
+        :xy => [70*SF, 50*SF],
+        :center => [-160*SF, 20*SF],
+        :shift => -1
+      },
+      {
+        :label => "Date",
+        :xy => [80*SF, 20*SF],
+        :center => [-150*SF, -50*SF],//clockPosition[:date][:center],
+        :complicationId => new Complications.Id(Complications.COMPLICATION_TYPE_WEEKDAY_MONTHDAY)
+      },
+      {
+        :label => "Notifications",
+        :xy => [50*SF, 20*SF],
+        :center => [20*SF, 133*SF],
+        :complicationId => new Complications.Id(Complications.COMPLICATION_TYPE_NOTIFICATION_COUNT)
+      }
 ];
 
-public var radialTouchOffset = 10;
+public var radialTouchOffset = 10*SF;
 public var radialData = [
       {
         :label => "Heart Rate",
-        :angle => 135,
+        :icon => null,
+        :icon_xy => [null, null],
+        :rotation => null,
+        :angle => 45,
         :radius => null,
         :value => null,
         :format => "%3d",
@@ -93,7 +83,10 @@ public var radialData = [
       },
       {
         :label => "Stress",
-        :angle => 180,
+        :icon => null,
+        :icon_xy => [null, null],
+        :rotation => null,
+        :angle => 0,
         :radius => null,
         :value => null,
         :format => "%3d",
@@ -101,7 +94,10 @@ public var radialData = [
       },
       {
         :label => "Steps",
-        :angle => 0,
+        :icon => null,
+        :icon_xy => [null, null],
+        :rotation => null,
+        :angle => 180,
         :radius => null,
         :value => null,
         :format => "%.1f",
@@ -109,6 +105,9 @@ public var radialData = [
       },
       {
         :label => "BodyBatt",
+        :icon => null,
+        :icon_xy => [null, null],
+        :rotation => null,
         :angle => 90,
         :radius => null,
         :value => null,
@@ -117,7 +116,10 @@ public var radialData = [
       },
       {
         :label => "Floors",
-        :angle => 45,
+        :icon => null,
+        :icon_xy => [null, null],
+        :rotation => null,
+        :angle => 135,
         :radius => null,
         :value => null,
         :format => "%2d",
@@ -125,6 +127,7 @@ public var radialData = [
       },
       {
         :label => "Batt",
+        :icon => null,
         :angle => 270,
         :radius => null,
         :value => null,
@@ -155,8 +158,10 @@ public var sunData = [
 public var xyData = [
       {
         :label => "Alt",
+        :icon => null,
+        :icon_xy => [null, null],
         :xy => [50*SF, 20*SF],
-        :center => [-75*SF, 90*SF],
+        :center => [-73*SF, 93*SF],
         :value => null,
         :units => "ft",
         :conversion => m2ft,
@@ -165,15 +170,19 @@ public var xyData = [
       },
       {
         :label => "TS",
+        :icon => null,
+        :icon_xy => [null, null],
         :xy => [50*SF, 20*SF],
-        :center => [-75*SF, 125*SF],
+        :center => [-70*SF, 133*SF],
         :value => null,
         :complicationId => new Complications.Id(Complications.COMPLICATION_TYPE_TRAINING_STATUS)
       },
       {
         :label => "RT",
+        :icon => null,
+        :icon_xy => [null, null],
         :xy => [50*SF, 20*SF],
-        :center => [85*SF, 90*SF],
+        :center => [83*SF, 93*SF],
         :value => null,
         :units => "h",
         :conversion => min2hr,
