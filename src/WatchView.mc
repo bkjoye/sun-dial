@@ -180,6 +180,7 @@ public class WatchView extends Ui.WatchFace {
     drawXYData(dc);
     drawWeather(dc);
     drawStatusBar(dc);
+    drawTics(dc);
     if (drawZones){
       drawTouchZones(dc);
     }
@@ -393,19 +394,26 @@ public class WatchView extends Ui.WatchFace {
         text = Lang.format("$1$", [tmpval]);
       }
 
-      var angle = radialData[i][:angle];
-      var radius = angle <= 180 ? center_x-(dc.getFontHeight(vectorFont)) : center_x-10;
+      var angle_offset = 0.0;
+      if (useIcons){
+        angle_offset = 3.0;
+      }
+      if (label.equals("STEPS")){
+        angle_offset*=2.0;
+      }
+      var angle = radialData[i][:angle] + angle_offset;
+      var radius = angle <= 190 ? center_x-(dc.getFontHeight(vectorFont)) : center_x-xSFs[10];
       if (radialData[i][:radius] == null){
         radialData[i][:radius] = center_x-(dc.getFontHeight(vectorFont))-radialTouchOffset;
       }
-      var direction = angle <= 180 ? Gfx.RADIAL_TEXT_DIRECTION_CLOCKWISE : Gfx.RADIAL_TEXT_DIRECTION_COUNTER_CLOCKWISE;
+      var direction = angle <= 190 ? Gfx.RADIAL_TEXT_DIRECTION_CLOCKWISE : Gfx.RADIAL_TEXT_DIRECTION_COUNTER_CLOCKWISE;
 
       var justification = Gfx.TEXT_JUSTIFY_CENTER;
       if (useIcons && !tmplabel.equals("batt")){
         justification = Gfx.TEXT_JUSTIFY_LEFT;
         dc.drawRadialText(center_x, center_y, vectorFont, text, justification, angle, radius, direction);
         // dc.drawBitmap2(center_x+radius*Math.cos(radialData[i][:angle]*deg2rad), center_y-radius*Math.sin(radialData[i][:angle]*deg2rad), radialData[i][:icon], {:transform => radialData[i][:rotation]});
-        var icon_angle = radialData[i][:angle]*deg2rad;
+        var icon_angle = (angle - angle_offset)*deg2rad;
         var x_part = Math.sin(icon_angle)*radialData[i][:icon_xy][0];
         var y_part = Math.cos(icon_angle)*radialData[i][:icon_xy][1];
         var diag = Math.sqrt(x_part*x_part+y_part*y_part);
@@ -416,7 +424,7 @@ public class WatchView extends Ui.WatchFace {
           radius_indrease = Math.sin((icon_angle)/2.0)*(vfSize)*1.0;
         }
         var icon_radius = radius + radius_indrease;
-        icon_angle += diag*(2.0*Math.cos(icon_angle/2.0) + .5)/radius;
+        icon_angle += diag*(2.0*Math.cos(icon_angle/2.0) + .5)/radius + angle_offset*deg2rad;
         dc.drawBitmap(center_x+icon_radius*Math.cos(icon_angle), center_y-icon_radius*Math.sin(icon_angle), radialData[i][:icon]);
       } else {
         dc.drawRadialText(center_x, center_y, vectorFont, text, justification, angle, radius, direction);
@@ -431,9 +439,9 @@ public class WatchView extends Ui.WatchFace {
     var degreeEnd = degreeStart+(0.45*data[:pct]);///100.0);
     var direction = dc.ARC_COUNTER_CLOCKWISE;
     dc.setPenWidth(10);
-    if (data[:pct]>66){
+    if (data[:pct]>50){
       dc.setColor(Gfx.COLOR_GREEN, Gfx.COLOR_TRANSPARENT);
-    } else if (data[:pct]>33){
+    } else if (data[:pct]>25){
       dc.setColor(Gfx.COLOR_YELLOW, Gfx.COLOR_TRANSPARENT);
     } else {
       dc.setColor(Gfx.COLOR_RED, Gfx.COLOR_TRANSPARENT);
@@ -475,6 +483,7 @@ public class WatchView extends Ui.WatchFace {
 
     var rise_str = "-";
     var set_str = "-";
+    var mid_str = "-";
     direction = Gfx.RADIAL_TEXT_DIRECTION_CLOCKWISE;
     if (sunData[0][:value] != null){
       var rise_hours = sunData[0][:value]/3600;
@@ -487,6 +496,13 @@ public class WatchView extends Ui.WatchFace {
       set_str = ""+set_hours.format("%02d")+":"+set_mins.format("%02d");
     }
 
+    if (sunData[0][:value] != null && sunData[1][:value] != null){
+      var mid_seconds = sunData[0][:value] + (sunData[1][:value]-sunData[0][:value])/2;
+      var mid_hours = mid_seconds/3600;
+      var mid_mins = mid_seconds % 3600/60;
+      mid_str = ""+mid_hours.format("%02d")+":"+mid_mins.format("%02d");
+    }
+
     if (sunData[0][:radius] == null){
       sunData[0][:radius] = radius;
       sunData[0][:y_offset] = offset;
@@ -496,6 +512,9 @@ public class WatchView extends Ui.WatchFace {
                       Gfx.TEXT_JUSTIFY_RIGHT, degreeEnd, 1.01*radius, direction);
     dc.drawRadialText(center_x, center_y+offset, vectorFont, set_str, 
                       Gfx.TEXT_JUSTIFY_LEFT, degreeStart, 1.01*radius, direction);
+
+    dc.drawRadialText(center_x, center_y+offset, vectorFontSmall, mid_str, 
+                      Gfx.TEXT_JUSTIFY_LEFT, 90, 1.01*radius, direction);
   }
 
   function drawXYData(dc){
@@ -518,14 +537,16 @@ public class WatchView extends Ui.WatchFace {
         } else if (xyData[i][:label].equals("TS")){
           var key = xyData[i][:value].toUpper();
           if (isDayTime && ts_colors.hasKey(key)){
-            dc.drawText(x, y, vectorFont, tmplabel+":", Gfx.TEXT_JUSTIFY_RIGHT|Gfx.TEXT_JUSTIFY_VCENTER);
             dc.setColor(ts_colors[key], Gfx.COLOR_TRANSPARENT);
-            dc.fillRoundedRectangle(x+xSFs[4], y-xSFs[10], xSFs[20], xSFs[20], xSFs[4]);
+            dc.fillRoundedRectangle(x+xSFs[10], y-xSFs[9], xSFs[20], xSFs[20], xSFs[4]);
             dc.setColor(Gfx.COLOR_LT_GRAY, Gfx.COLOR_TRANSPARENT);
             if (useIcons){
-              dc.drawBitmap(center_x+xyData[i][:center][0]-xyData[i][:icon_xy][0]*2.0-xSFs[3],
-                          center_y-xyData[i][:center][1]-xyData[i][:icon_xy][1], 
-                          xyData[i][:icon]);
+              dc.drawText(x, y, vectorFont, tmplabel+":", Gfx.TEXT_JUSTIFY_LEFT|Gfx.TEXT_JUSTIFY_VCENTER);
+              dc.drawBitmap(x-xyData[i][:icon_xy][0]*2.0-xSFs[3],
+                            y-xyData[i][:icon_xy][1], 
+                            xyData[i][:icon]);
+            } else {
+              dc.drawText(x, y, vectorFont, tmplabel+":", Gfx.TEXT_JUSTIFY_RIGHT|Gfx.TEXT_JUSTIFY_VCENTER);
             }
             continue;
           } else {
@@ -541,10 +562,12 @@ public class WatchView extends Ui.WatchFace {
       var offset = 0.0;
       var alignment = Gfx.TEXT_JUSTIFY_CENTER|Gfx.TEXT_JUSTIFY_VCENTER;
       if (useIcons){
-        dc.drawBitmap(center_x+xyData[i][:center][0]-xyData[i][:icon_xy][0]*2.0-xSFs[3],
-                    center_y-xyData[i][:center][1]-xyData[i][:icon_xy][1], 
-                    xyData[i][:icon]);
-        // offset = xyData[i][:icon_xy][0]*2;
+        if (xyData[i][:label].equals("ALT")){
+          offset = -xyData[i][:icon_xy][0]*2.0;
+        }
+        dc.drawBitmap(x-xyData[i][:icon_xy][0]*2.0-xSFs[3]+offset,
+                      y-xyData[i][:icon_xy][1], 
+                      xyData[i][:icon]);
         alignment = Gfx.TEXT_JUSTIFY_LEFT|Gfx.TEXT_JUSTIFY_VCENTER;
       }
       dc.drawText(x+offset, y, vectorFont, text, alignment);
@@ -679,6 +702,14 @@ public class WatchView extends Ui.WatchFace {
     dc.drawLine(x0, y0, x0+l, y0);
     dc.drawLine(x0, y0, x0, y0-h);
     dc.drawLine(x0+l, y0, x0+l, y0-h);
+  }
+
+  function drawTics(dc){
+    dc.setPenWidth(15);
+    dc.setColor(Gfx.COLOR_LT_GRAY, Gfx.COLOR_TRANSPARENT);
+    for (var i=22.5; i<= 157.5; i+=45.0){
+      dc.drawArc(center_x, center_y, center_x-xSFs[10], Gfx.ARC_CLOCKWISE, i+0.5, i-0.5);
+    }
   }
 
   function drawTouchZones(dc){
