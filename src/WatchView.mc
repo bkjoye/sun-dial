@@ -18,7 +18,7 @@ using Toybox.Weather as Weather;
 
 public class WatchView extends Ui.WatchFace {
 
-  var xSFs = new [167];
+  var xSFs = new [168];
   // fonts
   var weatherFont;
   var vectorFont;
@@ -638,7 +638,7 @@ public class WatchView extends Ui.WatchFace {
         dc.drawText(center_x-offset+position, center_y+voffset2, vectorFontSmall, 
                     Lang.format("$1$/$2$", 
                                 [convertTemp(weatherDaily[i].highTemperature).format("%d"), 
-                                 convertTemp(weatherDaily[i].lowTemperature).format("%d")]), 
+                                convertTemp(weatherDaily[i].lowTemperature).format("%d")]), 
                     Gfx.TEXT_JUSTIFY_CENTER);
         dc.drawText(center_x-offset+position, center_y+voffset3, vectorFontSmall, dow.substring(null, 2), Gfx.TEXT_JUSTIFY_CENTER);
       }
