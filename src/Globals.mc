@@ -14,7 +14,7 @@ public var dh = 0;
 public var center_x = 0;
 public var center_y = 0;
 
-public var useIcons = false;
+public var useIcons = true;
 
 
 public var drawZones = false;

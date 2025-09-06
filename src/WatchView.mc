@@ -22,6 +22,7 @@ public class WatchView extends Ui.WatchFace {
   // fonts
   var weatherFont;
   var vectorFont;
+  var vfSize;
   var vectorFontSmall;
   var clockFont;
 
@@ -55,42 +56,42 @@ public class WatchView extends Ui.WatchFace {
     clockFont = Gfx.FONT_SYSTEM_NUMBER_HOT;
 
     icons[:notification][:icon] = loadResource(Rez.Drawables.Notification);
-    icons[:notification][:x] = icons[:notification][:icon].getWidth()/2;
-    icons[:notification][:y] = icons[:notification][:icon].getHeight()/2;
+    icons[:notification][:x] = icons[:notification][:icon].getWidth()/2.0;
+    icons[:notification][:y] = icons[:notification][:icon].getHeight()/2.0;
     icons[:alarm][:icon] = loadResource(Rez.Drawables.Alarm);
-    icons[:alarm][:x] = icons[:alarm][:icon].getWidth()/2;
-    icons[:alarm][:y] = icons[:alarm][:icon].getHeight()/2;
+    icons[:alarm][:x] = icons[:alarm][:icon].getWidth()/2.0;
+    icons[:alarm][:y] = icons[:alarm][:icon].getHeight()/2.0;
     icons[:sync][:icon] = loadResource(Rez.Drawables.Sync);
-    icons[:sync][:x] = icons[:sync][:icon].getWidth()/2;
-    icons[:sync][:y] = icons[:sync][:icon].getHeight()/2;
+    icons[:sync][:x] = icons[:sync][:icon].getWidth()/2.0;
+    icons[:sync][:y] = icons[:sync][:icon].getHeight()/2.0;
 
     radialData[0][:icon] = loadResource(Rez.Drawables.Hr);
-    radialData[0][:icon_xy] = [radialData[0][:icon].getWidth()/2, radialData[0][:icon].getHeight()/2];
+    radialData[0][:icon_xy] = [radialData[0][:icon].getWidth()/2.0, radialData[0][:icon].getHeight()/2.0];
     radialData[0][:rotation] = new Gfx.AffineTransform();
     radialData[0][:rotation].rotate(88-radialData[0][:angle]);
     radialData[1][:icon] = loadResource(Rez.Drawables.Stress);
-    radialData[1][:icon_xy] = [radialData[1][:icon].getWidth()/2, radialData[1][:icon].getHeight()/2];
+    radialData[1][:icon_xy] = [radialData[1][:icon].getWidth()/2.0, radialData[1][:icon].getHeight()/2.0];
     radialData[1][:rotation] = new Gfx.AffineTransform();
     radialData[1][:rotation].rotate(88-radialData[1][:angle]);
     radialData[2][:icon] = loadResource(Rez.Drawables.Steps);
-    radialData[2][:icon_xy] = [radialData[2][:icon].getWidth()/2, radialData[2][:icon].getHeight()/2];
+    radialData[2][:icon_xy] = [radialData[2][:icon].getWidth()/2.0, radialData[2][:icon].getHeight()/2.0];
     radialData[2][:rotation] = new Gfx.AffineTransform();
     radialData[2][:rotation].rotate(88-radialData[2][:angle]);
     radialData[3][:icon] = loadResource(Rez.Drawables.Bb);
-    radialData[3][:icon_xy] = [radialData[3][:icon].getWidth()/2, radialData[3][:icon].getHeight()/2];
+    radialData[3][:icon_xy] = [radialData[3][:icon].getWidth()/2.0, radialData[3][:icon].getHeight()/2.0];
     radialData[3][:rotation] = new Gfx.AffineTransform();
     radialData[3][:rotation].rotate(88-radialData[3][:angle]);
     radialData[4][:icon] = loadResource(Rez.Drawables.Floors);
-    radialData[4][:icon_xy] = [radialData[4][:icon].getWidth()/2, radialData[4][:icon].getHeight()/2];
+    radialData[4][:icon_xy] = [radialData[4][:icon].getWidth()/2.0, radialData[4][:icon].getHeight()/2.0];
     radialData[4][:rotation] = new Gfx.AffineTransform();
     radialData[4][:rotation].rotate(88-radialData[4][:angle]);
     
     xyData[0][:icon] = loadResource(Rez.Drawables.Alt);
-    xyData[0][:icon_xy] = [xyData[0][:icon].getWidth()/2, xyData[0][:icon].getHeight()/2];
+    xyData[0][:icon_xy] = [xyData[0][:icon].getWidth()/2.0, xyData[0][:icon].getHeight()/2.0];
     xyData[1][:icon] = loadResource(Rez.Drawables.Ts);
-    xyData[1][:icon_xy] = [xyData[1][:icon].getWidth()/2, xyData[1][:icon].getHeight()/2];
+    xyData[1][:icon_xy] = [xyData[1][:icon].getWidth()/2.0, xyData[1][:icon].getHeight()/2.0];
     xyData[2][:icon] = loadResource(Rez.Drawables.Rt);
-    xyData[2][:icon_xy] = [xyData[2][:icon].getWidth()/2, xyData[2][:icon].getHeight()/2];
+    xyData[2][:icon_xy] = [xyData[2][:icon].getWidth()/2.0, xyData[2][:icon].getHeight()/2.0];
 
   }
 
@@ -114,6 +115,7 @@ public class WatchView extends Ui.WatchFace {
 
 
     vectorFont = Gfx.getVectorFont({:face=>["RobotoRegular","Swiss721Regular"], :size=>.15*center_x});
+    vfSize = .5*.15*center_x;
     vectorFontSmall = Gfx.getVectorFont({:face=>["RobotoRegular","Swiss721Regular"], :size=>.1*center_x});
 
     radialTouchOffset *= center_x;
@@ -403,7 +405,19 @@ public class WatchView extends Ui.WatchFace {
         justification = Gfx.TEXT_JUSTIFY_LEFT;
         dc.drawRadialText(center_x, center_y, vectorFont, text, justification, angle, radius, direction);
         // dc.drawBitmap2(center_x+radius*Math.cos(radialData[i][:angle]*deg2rad), center_y-radius*Math.sin(radialData[i][:angle]*deg2rad), radialData[i][:icon], {:transform => radialData[i][:rotation]});
-        dc.drawBitmap(center_x+radius*Math.cos(radialData[i][:angle]*deg2rad), center_y-radius*Math.sin(radialData[i][:angle]*deg2rad), radialData[i][:icon]);
+        var icon_angle = radialData[i][:angle]*deg2rad;
+        var x_part = Math.sin(icon_angle)*radialData[i][:icon_xy][0];
+        var y_part = Math.cos(icon_angle)*radialData[i][:icon_xy][1];
+        var diag = Math.sqrt(x_part*x_part+y_part*y_part);
+        var radius_indrease = 0.0;
+        if (icon_angle >= Math.PI/2.0){
+          radius_indrease = vfSize;
+        } else {
+          radius_indrease = Math.sin((icon_angle)/2.0)*(vfSize)*1.0;
+        }
+        var icon_radius = radius + radius_indrease;
+        icon_angle += diag*(2.0*Math.cos(icon_angle/2.0) + .5)/radius;
+        dc.drawBitmap(center_x+icon_radius*Math.cos(icon_angle), center_y-icon_radius*Math.sin(icon_angle), radialData[i][:icon]);
       } else {
         dc.drawRadialText(center_x, center_y, vectorFont, text, justification, angle, radius, direction);
       }
@@ -509,7 +523,7 @@ public class WatchView extends Ui.WatchFace {
             dc.fillRoundedRectangle(x+xSFs[4], y-xSFs[10], xSFs[20], xSFs[20], xSFs[4]);
             dc.setColor(Gfx.COLOR_LT_GRAY, Gfx.COLOR_TRANSPARENT);
             if (useIcons){
-              dc.drawBitmap(center_x+xyData[i][:center][0]-xyData[i][:icon_xy][0]*3,
+              dc.drawBitmap(center_x+xyData[i][:center][0]-xyData[i][:icon_xy][0]*2.0-xSFs[3],
                           center_y-xyData[i][:center][1]-xyData[i][:icon_xy][1], 
                           xyData[i][:icon]);
             }
@@ -527,7 +541,7 @@ public class WatchView extends Ui.WatchFace {
       var offset = 0.0;
       var alignment = Gfx.TEXT_JUSTIFY_CENTER|Gfx.TEXT_JUSTIFY_VCENTER;
       if (useIcons){
-        dc.drawBitmap(center_x+xyData[i][:center][0]-xyData[i][:icon_xy][0]*2,
+        dc.drawBitmap(center_x+xyData[i][:center][0]-xyData[i][:icon_xy][0]*2.0-xSFs[3],
                     center_y-xyData[i][:center][1]-xyData[i][:icon_xy][1], 
                     xyData[i][:icon]);
         // offset = xyData[i][:icon_xy][0]*2;
