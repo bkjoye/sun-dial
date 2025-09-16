@@ -34,7 +34,7 @@ public var clockPosition = {
         :center => [0*SF, 20*SF]
       },
       :date => {
-        :center => [-150*SF, -50*SF]
+        :center => [-10*SF, -50*SF]
       },
       :seconds => {
         :center => [120*SF, -50*SF]
@@ -73,6 +73,7 @@ public var radialData = [
       {
         :label => "Heart Rate",
         :icon => null,
+        :icon_size => [null, null],
         :icon_xy => [null, null],
         :rotation => null,
         :angle => 45,
@@ -84,6 +85,7 @@ public var radialData = [
       {
         :label => "Stress",
         :icon => null,
+        :icon_size => [null, null],
         :icon_xy => [null, null],
         :rotation => null,
         :angle => 0,
@@ -95,6 +97,7 @@ public var radialData = [
       {
         :label => "Steps",
         :icon => null,
+        :icon_size => [null, null],
         :icon_xy => [null, null],
         :rotation => null,
         :angle => 180,
@@ -106,6 +109,7 @@ public var radialData = [
       {
         :label => "BodyBatt",
         :icon => null,
+        :icon_size => [null, null],
         :icon_xy => [null, null],
         :rotation => null,
         :angle => 90,
@@ -117,6 +121,7 @@ public var radialData = [
       {
         :label => "Floors",
         :icon => null,
+        :icon_size => [null, null],
         :icon_xy => [null, null],
         :rotation => null,
         :angle => 135,
@@ -159,6 +164,7 @@ public var xyData = [
       {
         :label => "Alt",
         :icon => null,
+        :icon_size => [null, null],
         :icon_xy => [null, null],
         :xy => [50*SF, 20*SF],
         :center => [-73*SF, 93*SF],
@@ -171,6 +177,7 @@ public var xyData = [
       {
         :label => "TS",
         :icon => null,
+        :icon_size => [null, null],
         :icon_xy => [null, null],
         :xy => [50*SF, 20*SF],
         :center => [-70*SF, 133*SF],
@@ -180,6 +187,7 @@ public var xyData = [
       {
         :label => "RT",
         :icon => null,
+        :icon_size => [null, null],
         :icon_xy => [null, null],
         :xy => [50*SF, 20*SF],
         :center => [83*SF, 93*SF],

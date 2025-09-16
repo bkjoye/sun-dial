@@ -66,32 +66,32 @@ public class WatchView extends Ui.WatchFace {
     icons[:sync][:y] = icons[:sync][:icon].getHeight()/2.0;
 
     radialData[0][:icon] = loadResource(Rez.Drawables.Hr);
-    radialData[0][:icon_xy] = [radialData[0][:icon].getWidth()/2.0, radialData[0][:icon].getHeight()/2.0];
+    radialData[0][:icon_size] = [radialData[0][:icon].getWidth()/2.0, radialData[0][:icon].getHeight()/2.0];
     radialData[0][:rotation] = new Gfx.AffineTransform();
     radialData[0][:rotation].rotate(88-radialData[0][:angle]);
     radialData[1][:icon] = loadResource(Rez.Drawables.Stress);
-    radialData[1][:icon_xy] = [radialData[1][:icon].getWidth()/2.0, radialData[1][:icon].getHeight()/2.0];
+    radialData[1][:icon_size] = [radialData[1][:icon].getWidth()/2.0, radialData[1][:icon].getHeight()/2.0];
     radialData[1][:rotation] = new Gfx.AffineTransform();
     radialData[1][:rotation].rotate(88-radialData[1][:angle]);
     radialData[2][:icon] = loadResource(Rez.Drawables.Steps);
-    radialData[2][:icon_xy] = [radialData[2][:icon].getWidth()/2.0, radialData[2][:icon].getHeight()/2.0];
+    radialData[2][:icon_size] = [radialData[2][:icon].getWidth()/2.0, radialData[2][:icon].getHeight()/2.0];
     radialData[2][:rotation] = new Gfx.AffineTransform();
     radialData[2][:rotation].rotate(88-radialData[2][:angle]);
     radialData[3][:icon] = loadResource(Rez.Drawables.Bb);
-    radialData[3][:icon_xy] = [radialData[3][:icon].getWidth()/2.0, radialData[3][:icon].getHeight()/2.0];
+    radialData[3][:icon_size] = [radialData[3][:icon].getWidth()/2.0, radialData[3][:icon].getHeight()/2.0];
     radialData[3][:rotation] = new Gfx.AffineTransform();
     radialData[3][:rotation].rotate(88-radialData[3][:angle]);
     radialData[4][:icon] = loadResource(Rez.Drawables.Floors);
-    radialData[4][:icon_xy] = [radialData[4][:icon].getWidth()/2.0, radialData[4][:icon].getHeight()/2.0];
+    radialData[4][:icon_size] = [radialData[4][:icon].getWidth()/2.0, radialData[4][:icon].getHeight()/2.0];
     radialData[4][:rotation] = new Gfx.AffineTransform();
     radialData[4][:rotation].rotate(88-radialData[4][:angle]);
     
     xyData[0][:icon] = loadResource(Rez.Drawables.Alt);
-    xyData[0][:icon_xy] = [xyData[0][:icon].getWidth()/2.0, xyData[0][:icon].getHeight()/2.0];
+    xyData[0][:icon_size] = [xyData[0][:icon].getWidth()/2.0, xyData[0][:icon].getHeight()/2.0];
     xyData[1][:icon] = loadResource(Rez.Drawables.Ts);
-    xyData[1][:icon_xy] = [xyData[1][:icon].getWidth()/2.0, xyData[1][:icon].getHeight()/2.0];
+    xyData[1][:icon_size] = [xyData[1][:icon].getWidth()/2.0, xyData[1][:icon].getHeight()/2.0];
     xyData[2][:icon] = loadResource(Rez.Drawables.Rt);
-    xyData[2][:icon_xy] = [xyData[2][:icon].getWidth()/2.0, xyData[2][:icon].getHeight()/2.0];
+    xyData[2][:icon_size] = [xyData[2][:icon].getWidth()/2.0, xyData[2][:icon].getHeight()/2.0];
 
   }
 
@@ -137,6 +137,37 @@ public class WatchView extends Ui.WatchFace {
       touchZones[i][:xy][0] *= center_x;
       touchZones[i][:xy][1] *= center_y;
     }
+
+    var vfHeight = dc.getFontHeight(vectorFont);
+
+    if (useIcons){
+      for (var i=0; i < radialData.size(); i=i+1){
+        radialData[i][:radius] = center_x-(vfHeight)-radialTouchOffset;
+        if (radialData[i][:icon] == null){
+          continue;
+        }
+        var angle_offset = 3.0;
+        var angle = radialData[i][:angle];
+        var label = radialData[i][:label];
+        var radius = angle <= 190 ? center_x-(vfHeight) : center_x-xSFs[10]; 
+        if (label.equals("STEPS")){
+          angle_offset*=2.0;
+        }
+        var icon_angle = (angle)*deg2rad;
+        var x_part = Math.sin(icon_angle)*radialData[i][:icon_size][0];
+        var y_part = Math.cos(icon_angle)*radialData[i][:icon_size][1];
+        var diag = Math.sqrt(x_part*x_part+y_part*y_part);
+        var radius_indrease = 0.0;
+        if (icon_angle >= Math.PI/2.0){
+          radius_indrease = vfSize;
+        } else {
+          radius_indrease = Math.sin((icon_angle)/2.0)*(vfSize)*1.0;
+        }
+        var icon_radius = radius + radius_indrease;
+        icon_angle += diag*(2.0*Math.cos(icon_angle/2.0) + .5)/radius + angle_offset*deg2rad;
+        radialData[i][:icon_xy] = [center_x+icon_radius*Math.cos(icon_angle), center_y-icon_radius*Math.sin(icon_angle)];
+      }
+    }
   }
 
   function onUpdate(dc) {
@@ -169,7 +200,7 @@ public class WatchView extends Ui.WatchFace {
                 center_y-clockPosition[:date][:center][1], 
                 vectorFont, 
                 Lang.format("$1$, $2$ $3$", [clockTime.day_of_week, clockTime.month, clockTime.day]), 
-                Gfx.TEXT_JUSTIFY_LEFT|Gfx.TEXT_JUSTIFY_VCENTER);
+                Gfx.TEXT_JUSTIFY_RIGHT|Gfx.TEXT_JUSTIFY_VCENTER);
 
     if (hour instanceof Lang.Number && minute instanceof Lang.Number) {
       sunData[0][:day_seconds] = hour*3600+minute*60+sec;
@@ -403,9 +434,6 @@ public class WatchView extends Ui.WatchFace {
       }
       var angle = radialData[i][:angle] + angle_offset;
       var radius = angle <= 190 ? center_x-(dc.getFontHeight(vectorFont)) : center_x-xSFs[10];
-      if (radialData[i][:radius] == null){
-        radialData[i][:radius] = center_x-(dc.getFontHeight(vectorFont))-radialTouchOffset;
-      }
       var direction = angle <= 190 ? Gfx.RADIAL_TEXT_DIRECTION_CLOCKWISE : Gfx.RADIAL_TEXT_DIRECTION_COUNTER_CLOCKWISE;
 
       var justification = Gfx.TEXT_JUSTIFY_CENTER;
@@ -413,19 +441,8 @@ public class WatchView extends Ui.WatchFace {
         justification = Gfx.TEXT_JUSTIFY_LEFT;
         dc.drawRadialText(center_x, center_y, vectorFont, text, justification, angle, radius, direction);
         // dc.drawBitmap2(center_x+radius*Math.cos(radialData[i][:angle]*deg2rad), center_y-radius*Math.sin(radialData[i][:angle]*deg2rad), radialData[i][:icon], {:transform => radialData[i][:rotation]});
-        var icon_angle = (angle - angle_offset)*deg2rad;
-        var x_part = Math.sin(icon_angle)*radialData[i][:icon_xy][0];
-        var y_part = Math.cos(icon_angle)*radialData[i][:icon_xy][1];
-        var diag = Math.sqrt(x_part*x_part+y_part*y_part);
-        var radius_indrease = 0.0;
-        if (icon_angle >= Math.PI/2.0){
-          radius_indrease = vfSize;
-        } else {
-          radius_indrease = Math.sin((icon_angle)/2.0)*(vfSize)*1.0;
-        }
-        var icon_radius = radius + radius_indrease;
-        icon_angle += diag*(2.0*Math.cos(icon_angle/2.0) + .5)/radius + angle_offset*deg2rad;
-        dc.drawBitmap(center_x+icon_radius*Math.cos(icon_angle), center_y-icon_radius*Math.sin(icon_angle), radialData[i][:icon]);
+        
+        dc.drawBitmap(radialData[i][:icon_xy][0], radialData[i][:icon_xy][1], radialData[i][:icon]);
       } else {
         dc.drawRadialText(center_x, center_y, vectorFont, text, justification, angle, radius, direction);
       }
@@ -542,8 +559,8 @@ public class WatchView extends Ui.WatchFace {
             dc.setColor(Gfx.COLOR_LT_GRAY, Gfx.COLOR_TRANSPARENT);
             if (useIcons){
               dc.drawText(x, y, vectorFont, tmplabel+":", Gfx.TEXT_JUSTIFY_LEFT|Gfx.TEXT_JUSTIFY_VCENTER);
-              dc.drawBitmap(x-xyData[i][:icon_xy][0]*2.0-xSFs[3],
-                            y-xyData[i][:icon_xy][1], 
+              dc.drawBitmap(x-xyData[i][:icon_size][0]*2.0-xSFs[3],
+                            y-xyData[i][:icon_size][1], 
                             xyData[i][:icon]);
             } else {
               dc.drawText(x, y, vectorFont, tmplabel+":", Gfx.TEXT_JUSTIFY_RIGHT|Gfx.TEXT_JUSTIFY_VCENTER);
@@ -563,10 +580,10 @@ public class WatchView extends Ui.WatchFace {
       var alignment = Gfx.TEXT_JUSTIFY_CENTER|Gfx.TEXT_JUSTIFY_VCENTER;
       if (useIcons){
         if (xyData[i][:label].equals("ALT")){
-          offset = -xyData[i][:icon_xy][0]*2.0;
+          offset = -xyData[i][:icon_size][0]*2.0;
         }
-        dc.drawBitmap(x-xyData[i][:icon_xy][0]*2.0-xSFs[3]+offset,
-                      y-xyData[i][:icon_xy][1], 
+        dc.drawBitmap(x-xyData[i][:icon_size][0]*2.0-xSFs[3]+offset,
+                      y-xyData[i][:icon_size][1], 
                       xyData[i][:icon]);
         alignment = Gfx.TEXT_JUSTIFY_LEFT|Gfx.TEXT_JUSTIFY_VCENTER;
       }
