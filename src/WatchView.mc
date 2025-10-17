@@ -211,7 +211,9 @@ public class WatchView extends Ui.WatchFace {
     drawXYData(dc);
     drawWeather(dc);
     drawStatusBar(dc);
-    drawTics(dc);
+    if (useIcons){
+      drawTics(dc);
+    }
     if (drawZones){
       drawTouchZones(dc);
     }
@@ -437,7 +439,7 @@ public class WatchView extends Ui.WatchFace {
       var direction = angle <= 190 ? Gfx.RADIAL_TEXT_DIRECTION_CLOCKWISE : Gfx.RADIAL_TEXT_DIRECTION_COUNTER_CLOCKWISE;
 
       var justification = Gfx.TEXT_JUSTIFY_CENTER;
-      if (useIcons && !tmplabel.equals("batt")){
+      if (useIcons && !tmplabel.equals("batt") && radialData[i][:icon_xy][0] != null && radialData[i][:icon] instanceof Gfx.BitmapReference){
         justification = Gfx.TEXT_JUSTIFY_LEFT;
         dc.drawRadialText(center_x, center_y, vectorFont, text, justification, angle, radius, direction);
         // dc.drawBitmap2(center_x+radius*Math.cos(radialData[i][:angle]*deg2rad), center_y-radius*Math.sin(radialData[i][:angle]*deg2rad), radialData[i][:icon], {:transform => radialData[i][:rotation]});

@@ -133,6 +133,7 @@ public var radialData = [
       {
         :label => "Batt",
         :icon => null,
+        :icon_xy => [null, null],
         :angle => 270,
         :radius => null,
         :value => null,
